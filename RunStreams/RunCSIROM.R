@@ -1,5 +1,5 @@
 rm(list=ls())
-Path <- "C:/Research/NewRat/NewRat_spat/"
+Path <- sub("/*$", "/", Sys.getenv("RATPACK_ROOT", unset = getwd()))
 setwd(Path)
 
 library(r4ss)
@@ -7,7 +7,7 @@ library(RTMB)
 library(RcppArmadillo)
 library(Rcpp)
 
-source("RatPackR.r")
+source("RatpackR.R")
 
 # =========================================================================================================================
 # =========================================================================================================================

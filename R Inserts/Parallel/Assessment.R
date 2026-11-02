@@ -1619,8 +1619,10 @@ Run_Tier1a <- function(Isim,Istock,Iarea,Year)
   Nhist <- Stock[[Istock]]$Nhist
 
   # Copy the SS file
-  File.from <- paste0(Path,"CodeBase/SS.exe")
-  File.to <- paste0(Folder,"SS.exe")
+  SS.exe <- if (.Platform$OS.type == "windows") "SS.exe" else "ss3"     # Linux: CodeBase/ss3_linux is copied in as ss3
+  SS.cmd <- if (.Platform$OS.type == "windows") "SS" else "./ss3"
+  File.from <- paste0(Path,"CodeBase/",if (.Platform$OS.type == "windows") "ss.exe" else "ss3_linux")
+  File.to <- paste0(Folder,SS.exe)
   file.copy(File.from,File.to)
   
   # Start with the starter file
@@ -1639,10 +1641,10 @@ Run_Tier1a <- function(Isim,Istock,Iarea,Year)
   file.copy("ss3.par","ss3par.par",overwrite=T)
   cat("Running Stock Synthesis",Isim,Istock,Year,Stock[[Istock]]$Ass$SS_est_opt,Stock[[Istock]]$Ass$Clean.up,"\n")
   
-  if (Stock[[Istock]]$Ass$SS_est_opt=="Full") vv <- system("SS",intern=T)
-  if (Stock[[Istock]]$Ass$SS_est_opt=="First.Full.Only" & Year == Stock[[Istock]]$Nhist) vv <- system("SS",intern=T)
-  if (Stock[[Istock]]$Ass$SS_est_opt=="First.Full.Only" & Year != Stock[[Istock]]$Nhist) vv <- system("SS -est",intern=T)
-  if (Stock[[Istock]]$Ass$SS_est_opt=="EstOnly") vv <- system("SS -est",intern=T)
+  if (Stock[[Istock]]$Ass$SS_est_opt=="Full") vv <- system(SS.cmd,intern=T)
+  if (Stock[[Istock]]$Ass$SS_est_opt=="First.Full.Only" & Year == Stock[[Istock]]$Nhist) vv <- system(SS.cmd,intern=T)
+  if (Stock[[Istock]]$Ass$SS_est_opt=="First.Full.Only" & Year != Stock[[Istock]]$Nhist) vv <- system(paste(SS.cmd,"-est"),intern=T)
+  if (Stock[[Istock]]$Ass$SS_est_opt=="EstOnly") vv <- system(paste(SS.cmd,"-est"),intern=T)
   if (file.exists("ss3par.par")) file.remove("ss3par.par",showWarnings=F)
   
   # Use local assignment (<-) instead of global (<<-) to prevent memory bloat in the worker
@@ -1720,11 +1722,11 @@ modeloutput <- tryCatch({
 
   if (!Estimation.test %in% c(99) & (Stock[[Istock]]$Ass$Clean.up=="Default" || Stock[[Istock]]$Ass$Clean.up=="Full"))
    {
-    file.remove("SS.exe")
+    file.remove(SS.exe)
     file.remove("echoinput.sso")
     file.remove("warning.sso")
-    file.remove("compreport.sso")
-    file.remove("cumreport.sso")
+    file.remove("CompReport.sso")
+    file.remove("CumReport.sso")
     file.remove("covar.sso")
     file.remove("ss3.par")
     file.remove("ss3.rep")
@@ -1737,7 +1739,7 @@ modeloutput <- tryCatch({
    }
   if (Stock[[Istock]]$Ass$Clean.up=="Full")
    {
-    file.remove("Report.SSO")
+    file.remove("Report.sso")
     file.remove("starter.ss")
     file.remove("data.dat")
     file.remove("data.ctl")
