@@ -1332,7 +1332,7 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
       Length.seeds[IassArea,Itype,Year,Ifleet] <- floor(runif(1,1,1000000))
   StockDetails$Data$Length.spec <- Length.spec
   StockDetails$Data$Length.seeds <- Length.seeds
-  StockDetails$Data$LengthData <- rep(0,6+Nsex*Nlen)
+  StockDetails$Data$LengthData <- rep(0,7+Nsex*Nlen)   # FIX #22: same width as the rows DataGen appends
   StockDetails$Data$NlengthData <- 0
   if (FullOutput==T) cat("Done: Length readin\n")
   

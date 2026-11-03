@@ -62,6 +62,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 19 | #19 CatchDiscardl typo | CatchDiscard; $Full → $FullF | none changed | pass (E1) | ProjectFleetArea discards 0 → 6792 t (= ProjectAll) | safe |
 | 20 | #20 rec-dev bias ramp | calendar years; 1 → 0 over the ramp | none changed (B13 is a demo) | pass / pass | identical | safe |
 | 21 | #21 RNG streams restarted | set.seed(NextSeed) | B16 fixed; others unchanged | pass (E1, E99) | E1 identical; E99 draws change (RBC 59 369 → 29 659 t, 1 sim) | safe; breaks draw-for-draw reproducibility with old runs |
+| 22 | #22 LengthData seed row | width 7+Nsex*Nlen | B18 fixed; others unchanged | pass (E1) | identical; rbind warning gone | safe |
 
 ## Notes per step
 
@@ -344,3 +345,10 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   draw-for-draw, even with the same seeds. Distributions over many simulations should be
   equivalent.
 - **Verdict:** safe; only the random draws change, by design.
+
+### Step 22: bug #22, `LengthData` seed row width (`ReadIn.R:1335`)
+- **Change:** `rep(0,7+Nsex*Nlen)`, the same width as the rows `DataGen` appends.
+- **Checks:** B18 changed to NOT REPRODUCED. No other check changed.
+- **Smoke test:** E1, 95 s, exit 0. Outputs are identical. The
+  `number of columns of result is not a multiple` warning is gone (1 → 0).
+- **Verdict:** safe.
