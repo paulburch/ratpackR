@@ -63,6 +63,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 20 | #20 rec-dev bias ramp | calendar years; 1 → 0 over the ramp | none changed (B13 is a demo) | pass / pass | identical | safe |
 | 21 | #21 RNG streams restarted | set.seed(NextSeed) | B16 fixed; others unchanged | pass (E1, E99) | E1 identical; E99 draws change (RBC 59 369 → 29 659 t, 1 sim) | safe; breaks draw-for-draw reproducibility with old runs |
 | 22 | #22 LengthData seed row | width 7+Nsex*Nlen | B18 fixed; others unchanged | pass (E1) | identical; rbind warning gone | safe |
+| 23 | #23 file.remove showWarnings | argument dropped (calls already guarded) | none changed | pass (E1, E99) | identical; FALSE-file warnings 4 → 0 | safe |
 
 ## Notes per step
 
@@ -351,4 +352,13 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Checks:** B18 changed to NOT REPRODUCED. No other check changed.
 - **Smoke test:** E1, 95 s, exit 0. Outputs are identical. The
   `number of columns of result is not a multiple` warning is gone (1 → 0).
+- **Verdict:** safe.
+
+### Step 23: bug #23, `file.remove(..., showWarnings=F)` (`Assessment.R`, 10 calls)
+- **Change:** the `showWarnings=F` argument is dropped. `file.remove` has no such argument, so
+  `FALSE` was treated as a file name. Every call is already guarded by `file.exists()`.
+- **Checks:** none changed.
+- **Smoke tests:** E1 94 s and E99 104 s, both exit 0. Outputs are identical: E1 against
+  step 22, E99 against step 21. The `cannot remove file 'FALSE'` warnings in E99 went from 4
+  to 0.
 - **Verdict:** safe.
