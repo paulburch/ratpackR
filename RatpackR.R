@@ -821,7 +821,7 @@ SPR_ref <- function(Istock,Fmult=0,AveF,Iyear)
      # Compute F by age, sex and fleet and then Z by sex and age
      for (Iage in 1:MaxAge)
       {
-       Z[Iarea,Isex,Iage] <- Stock[[Istock]]$M[Isex,Iage,1]; 
+       Z[Iarea,Isex,Iage] <- Stock[[Istock]]$M[Isex,Iage,Iyear];    # FIX #31: M for the reference year (was year 1)
        for (Ifleet in 1:Ncat_fleet){  
         FF[Iarea,Ifleet] <- AveF[Iarea,Ifleet]*Fmult
         Z[Iarea,Isex,Iage] <- Z[Iarea,Isex,Iage] + FF[Iarea,Ifleet]*Stock[[Istock]]$SelAge[Ifleet,Isex,Iage,Iyear];
@@ -868,7 +868,7 @@ SPR_ref <- function(Istock,Fmult=0,AveF,Iyear)
    } # Isex
  
   # Initial Spawning biomass-per-recruit
-  for (Iarea in 1:Narea) SSBR[Iarea] <- sum(Neqn[Iarea,1,]*Stock[[Istock]]$Fecundity[,1])
+  for (Iarea in 1:Narea) SSBR[Iarea] <- sum(Neqn[Iarea,1,]*Stock[[Istock]]$Fecundity[,Iyear])   # FIX #31: fecundity for the reference year (was year 1)
 
   Return.V <- NULL
   Return.V$Ninit <- Neqn

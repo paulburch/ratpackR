@@ -70,6 +70,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 28 | S#28 Stock[[1]]$Nhist | Stock[[Istock]]$Nhist | none changed | pass (E1) | identical | safe |
 | 29 | S#29 HybridA all areas closed (**now confirmed**) | skip normalisation when no open area (no catch) | none changed | pass (E1); closed-area copy: old crashes, new runs (catch 0) | identical | safe |
 | 30 | S#30 MSY not 2/3 | explicit stop() with message | none changed | pass (E1); MSY 1 copy: clear error instead of "Fout not found" | identical | safe |
+| 31 | S#31 SPR_ref year-1 biology | use M and fecundity of Iyear (design to confirm) | none changed | pass / pass | identical (TrueRBC 2504.2 t both) | safe; matters with time-varying M |
 
 ## Notes per step
 
@@ -444,3 +445,17 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Checks:** none changed.
 - **Smoke test:** E1, 92 s, exit 0. Outputs are identical.
 - **Verdict:** safe; it only improves the error message. All current inputs use `#MSY 3`.
+
+### Step 31: suspected #31, `SPR_ref` uses year-1 M and fecundity (`RatpackR.R:824, 871`)
+- **Change:** `M[Isex,Iage,Iyear]` and `Fecundity[,Iyear]`, so the reference points use the
+  biology of the year being evaluated, consistent with the selectivity already used.
+  **Design choice for André:** the alternative is to keep year-1 (unfished-era) biology
+  deliberately.
+- **Effect:** `SPR_ref` only feeds the `TrueRBC` performance metric (`Project.One.Ahead`);
+  it does not affect management.
+- **Smoke tests:** E1 93 s and E2 98 s, both exit 0. Outputs are identical: Silver.warehou's
+  M and fecundity in the reference year equal year 1, and `TrueRBC` is 2504.2 t before and
+  after. The fix changes results only when M or fecundity vary over time (heatwave M, M
+  links, time-varying growth).
+- **Checks:** none changed.
+- **Verdict:** safe; it only matters with time-varying biology.
