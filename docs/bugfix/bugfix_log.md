@@ -73,6 +73,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 31 | S#31 SPR_ref year-1 biology | use M and fecundity of Iyear (design to confirm) | none changed | pass / pass | identical (TrueRBC 2504.2 t both) | safe; matters with time-varying M |
 | 32 | S#32 `<-` on globals | `<<-` for General$Nsim and Stock$TheTACs | none changed | pass (E1); E0 before = after | identical | safe |
 | 33–34 | S#33 TAC slot 50; S#34 one-sim return | no change (harmless / intended) | – | – | – | left as is |
+| 35 | S#35 DataGen multi-area discards & CAA | sum over the assessment area's biological areas | none changed | pass / pass; CAA copy: old = new (127 rows) | identical (1 area) | safe; Write_data split left (design) |
 
 ## Notes per step
 
@@ -478,4 +479,22 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **#34** (`DoRun` stops after 1 simulation unless `Estimation.test >= 90`): André's
   intended development behaviour. Left as is; it is documented in `docs/cloud_setup.md`.
 
-
+### Step 35: suspected #35, multi-area data generation in `DataGen` (`DataGen.R:51-57, 170-175`)
+- **Change:**
+  - discard data use the total and retained catch summed over the biological areas in the
+    assessment area (`Use`), instead of indexing biological areas by the assessment-area
+    number;
+  - CAA expected values are summed over `Use` instead of using `Iarea` left over from an
+    earlier loop (the last area only).
+- **Not changed:** `Write_data` still writes discard data without an area split
+  (`Assessment.R:172`). Fixing it needs an area column in `DiscardData`, a data-structure
+  change for André.
+- **Smoke tests:** E1 99 s and E2 99 s, both exit 0. Outputs are identical; the discard path
+  is exercised because Silver.warehou has discard data.
+- **CAA branch:** a copy with CAA samples for fleet 1 in 2015–2019 (`Temp/CAAInputs/`). Old and
+  new code both completed and wrote **127 CAA rows**; the SS `data.dat` files are
+  **identical** (single area).
+- **Side observation for #36:** these deterministic CAA rows are not proportions. A sample
+  of size 1 has observations summing to about 5, and one of size 2 about 57.
+- **Checks:** none changed.
+- **Verdict:** safe; it only changes results with several areas per assessment area.

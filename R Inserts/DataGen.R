@@ -48,13 +48,13 @@ DataGen <- function(Istock,Year,BioPreds)
   # Discard data
   for (Ifleet in 1:Ncat_fleet)
     for (IassArea in 1:NassArea)
-      if (Stock[[Istock]]$Data$Discard.spec[IassArea,Year,Ifleet] > 0  & Stock[[Istock]]$CatchTotal[IassArea,Ifleet,Year] > 1.0e-5)
+      if (Stock[[Istock]]$Data$Discard.spec[IassArea,Year,Ifleet] > 0  & sum(Stock[[Istock]]$CatchTotal[which(FleetsToAreas==IassArea),Ifleet,Year]) > 1.0e-5)   # FIX #35: sum over the biological areas in this assessment area
        {
         Use <- which(FleetsToAreas==IassArea)
         #cat(Ifleet,Year,Stock[[Istock]]$Data$NdiscardData,"\n")
         Stock[[Istock]]$Data$NdiscardData <<- Stock[[Istock]]$Data$NdiscardData+1
-        Discard <- Stock[[Istock]]$CatchTotal[IassArea,Ifleet,Year] - Stock[[Istock]]$CatchRetained[IassArea,Ifleet,Year]+1.0e-20
-        if (Stock[[Istock]]$Data$Discard.type[Ifleet]==2) Discard <- Discard/(Stock[[Istock]]$CatchTotal[IassArea,Ifleet,Year]+1.0e-20)
+        Discard <- sum(Stock[[Istock]]$CatchTotal[Use,Ifleet,Year]) - sum(Stock[[Istock]]$CatchRetained[Use,Ifleet,Year])+1.0e-20
+        if (Stock[[Istock]]$Data$Discard.type[Ifleet]==2) Discard <- Discard/(sum(Stock[[Istock]]$CatchTotal[Use,Ifleet,Year])+1.0e-20)
         IndexNo <- Stock[[Istock]]$Data$NdiscardData
         Stock[[Istock]]$Data$DiscardData[IndexNo,1:3] <<- c(Year+YrOffset,7,Ifleet)
         if (TestCase==F) Stock[[Istock]]$Data$DiscardData[IndexNo,4]   <<- Discard*exp(Stock[[Istock]]$Data$Discard.dev[IassArea,Year,Ifleet])+1.0e-20
@@ -169,9 +169,11 @@ DataGen <- function(Istock,Year,BioPreds)
               for (Ilen in 1:length(LenSampleSize))
                 if (LenSampleSize[Ilen] >= 1)
                 {
-                  if (Itype==1) Expected <- Stock[[Istock]]$CatchAtCAARet[Iarea,Ifleet,Isex,,Ilen,Year]+1.0e-10
-                  if (Itype==2) Expected <- Stock[[Istock]]$CatchAtCAATot[Iarea,Ifleet,Isex,,Ilen,Year]-Stock[[Istock]]$CatchAtCAARet[Iarea,Ifleet,Isex,,Ilen,Year]+1.0e-10
-                  if (Itype==3) Expected <- Stock[[Istock]]$CatchAtCAATot[Iarea,Ifleet,Isex,,Ilen,Year]+1.0e-10
+                  # FIX #35: sum over all biological areas in this assessment area (was the last Iarea only)
+                  SumUse <- function(A) colSums(matrix(A,nrow=length(Use)))
+                  if (Itype==1) Expected <- SumUse(Stock[[Istock]]$CatchAtCAARet[Use,Ifleet,Isex,,Ilen,Year])+1.0e-10
+                  if (Itype==2) Expected <- SumUse(Stock[[Istock]]$CatchAtCAATot[Use,Ifleet,Isex,,Ilen,Year])-SumUse(Stock[[Istock]]$CatchAtCAARet[Use,Ifleet,Isex,,Ilen,Year])+1.0e-10
+                  if (Itype==3) Expected <- SumUse(Stock[[Istock]]$CatchAtCAATot[Use,Ifleet,Isex,,Ilen,Year])+1.0e-10
                   Expected <- as.vector(Stock[[Istock]]$AgeErrorMatrix[1,,] %*% Expected)
                   if (sum(Expected)<=0) 
                     cat("Error-CAA2",Istock,Itype,Ifleet,Ilen,Year,"\n")
