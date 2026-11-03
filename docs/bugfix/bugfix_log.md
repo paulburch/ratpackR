@@ -57,6 +57,8 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 14 | #14 Tier 5 / no TAC management crash | TAC array set to 0 (F from F.fix) | none changed | pass / pass | identical; Tier 5 run: old crashes, new completes | safe, verified end-to-end |
 | 15 | #15 CatchType 3 index | F.Selex.Inp[,Ifleet,] (zero F fill still open) | none changed (B12 is a demo) | pass (E1 only) | identical | crash fixed; CatchType 3 still needs data |
 | 16 | #16 Tier 4a map logr | logR | none changed (B20 is a demo) | P.cod Tier 4a: old crashes, new completes | n/a | safe; Tier 4a gives RBC 0 for P.cod in both settings (investigate) |
+| 17 | #17 Parallel drift | not attempted (needs a rebuild of the parallel files) | – | – | – | open |
+| 18 | #18 CPUE double selectivity | drop SelexAge (already in SelRetWghtAge) | none changed | pass / pass | identical (0/1 selectivity in all inputs) | safe |
 
 ## Notes per step
 
@@ -266,3 +268,41 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   It is added to the review as a suspected issue.
 - **Verdict:** safe; the crash is fixed. The Tier 4a performance for P.cod needs a separate
   look.
+
+### Step 17: bug #17, `R Inserts/Parallel/` drift (not attempted)
+- This needs the parallel copies **rebuilt** from the current `RatpackR.R`/`Assessment.R`,
+  keeping only the `foreach` wrapper. That is a separate task, not a line fix, and it can't
+  be tested meaningfully without a multi-core run design. It is left for a decision with
+  André, since he may maintain the parallel version separately.
+
+### Step 18: bug #18, catch-fleet CPUE predictions apply age selectivity twice (`RatpackR.R:553`)
+- **Change:** `SelexAge[...]*` is removed in front of `SelRetWghtAge[...]`, which already
+  includes it (`ReadIn.R:969`). The survey branch (line 555) was already correct.
+- **Checks:** none changed. B19 is INFO only: 0 of 2304 values for Silver.warehou lie strictly
+  between 0 and 1.
+- **Smoke tests:** E1 91 s and E2 95 s, both exit 0. Outputs are identical, as predicted:
+  with 0/1 age selectivity, squaring changes nothing. No current input has indexed catch
+  fleets with 0 < age selectivity < 1, so the fix only matters for future inputs.
+- **Verdict:** safe.
+
+## Summary after the High and Medium fixes (steps 1–18)
+- **Applied and tested:** 17 fixes (#1–#16 and #18), one commit each, cumulative.
+  **No fix broke another part of the code.** Every smoke run completed. Each step changed only
+  the check for the bug it fixed, and outputs changed only where the fix was meant to act:
+  - #1: Cost and Profit columns go from NA to numbers;
+  - #2: 2026 TAC ×0.9 in the buffer-study input;
+  - #3: E99 folder 11 MB → 1.7 MB.
+- **Fixes confirmed by running a branch that used to crash:** #13 (discard ages), #14
+  (Tier 5) and #16 (Tier 4a `EstR No`/`EstZ Yes`).
+- **Design choices André should confirm:**
+  - #2: the buffer combination (multiplicative);
+  - #5: the PGMSY rule for a zero-catch linked fleet;
+  - #8: the movement age convention;
+  - #14: a zero TAC without TAC management.
+- **Still open:**
+  - #15: `CatchType` 3 historical F is all zeros and needs a data source;
+  - #17: the parallel rebuild;
+  - the multi-stock and multi-area fixes (#4–#8) were checked only with synthetic cases;
+  - new observation: Tier 4a gives RBC 0 for P.cod.
+- **Not started:** the Low-severity items (#19–#24, plus the suspected list), pending Paul's
+  go-ahead.

@@ -19,6 +19,11 @@ platform-dependent SS call added for Linux.
   (multi-area, multi-stock, Tier 4b, `CatchType` 3, and so on).
 - **Low**: cosmetic, diagnostic-only, latent, or a robustness issue.
 
+**Fix experiments (branch `bugfix-experiments`).** Bugs #1–#16 and #18 have been fixed one at a
+time there and regression-tested; see `docs/bugfix/bugfix_log.md`. No fix broke another part
+of the code. #17 (the parallel copies) is not attempted, and the Low items are not started.
+Original code: branches `linux-portability` and `bug-review`.
+
 ---
 
 ## Summary
@@ -49,7 +54,7 @@ platform-dependent SS call added for Linux.
 | 22 | Low | `ReadIn.R:1335` | `LengthData` seed row is one column short | Confirmed (test B18, warning) |
 | 23 | Low | `Assessment.R` `file.remove(..., showWarnings=F)` | `showWarnings` is not a `file.remove` argument; R tries to delete a file named `FALSE` | Confirmed (smoke warning) |
 | 24 | Low | `WriteOut.R:463` | `Totals <- rep(0,35)` but each fleet block has 41 values | Confirmed (smoke warning) |
-| 25-44 | Low / Suspected | various | see "Further findings" | mostly Suspected |
+| 25-45 | Low / Suspected | various | see "Further findings" | mostly Suspected |
 
 ---
 
@@ -363,6 +368,12 @@ platform-dependent SS call added for Linux.
     return 50 values, `RBCsOrig[Istock,IassArea,] <- Run_Assessment(...)` fails (*not a multiple
     of replacement length*). `Utils.cpp`, `Project2` and `GetRecruit` (`Model.cpp`) are not used
     anywhere. `GetRec`'s Ricker branch uses an undefined `SSB0` (dead code, `SR_type=2`).
+
+45. **Tier 4a gives RBC = 0 for P.cod** (found during the fix tests). This happens with both
+    P.cod's own `EstR Yes/EstZ No` and `EstR No/EstZ Yes`, with `sdreport` warnings
+    (`NaNs produced`). True 2025 depletion is 25%, between `alpha` (0.20) and `beta` (0.35),
+    so the RBC should be positive. The fit may underestimate depletion, or the Hessian may be
+    singular. Suspected; needs a closer look.
 
 ## Checks that passed
 

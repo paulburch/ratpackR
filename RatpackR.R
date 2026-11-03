@@ -550,7 +550,7 @@ Project.One.Ahead <- function(Istock,Iyear)
       for (Isex in 1:Nsex)
        for (Iage in 1:MaxAge)
         if (Ifleet <= General$Ncat_fleet)    
-         BioPreds[Iarea,Ifleet] <- BioPreds[Iarea,Ifleet] +  Stock[[Istock]]$SelexAge[Isex,Ifleet,Iage,Iyear]*Stock[[Istock]]$SelRetWghtAge[Ifleet,Isex,Iage,Iyear]*Stock[[Istock]]$N[Iarea,Isex,Iage,Iyear]*(1.0-exp(-Z[Isex,Iage]))/Z[Isex,Iage]
+         BioPreds[Iarea,Ifleet] <- BioPreds[Iarea,Ifleet] +  Stock[[Istock]]$SelRetWghtAge[Ifleet,Isex,Iage,Iyear]*Stock[[Istock]]$N[Iarea,Isex,Iage,Iyear]*(1.0-exp(-Z[Isex,Iage]))/Z[Isex,Iage]
         else
          BioPreds[Iarea,Ifleet] <- BioPreds[Iarea,Ifleet] +  Stock[[Istock]]$SelexAge[Isex,Ifleet,Iage,Iyear]*Stock[[Istock]]$SelWghtAge[Ifleet,Isex,Iage,Iyear]*Stock[[Istock]]$N[Iarea,Isex,Iage,Iyear]*exp(-Z[Isex,Iage]/2)
       }
