@@ -55,7 +55,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 12 | #12 Tier 4b CPUE limit | compare with Cpue.limit | none changed (B06 is a stand-alone demo; rule verified separately) | pass (E1 only) | identical (Tier 4b unused) | safe; not run end-to-end |
 | 13 | #13 DataGen discard ages | Stock[[Istock]]...[Iarea,...] | none changed (B07 is a demo) | pass (E1 only) | identical; with discard ages on: old code crashes, new code runs | safe, verified end-to-end |
 | 14 | #14 Tier 5 / no TAC management crash | TAC array set to 0 (F from F.fix) | none changed | pass / pass | identical; Tier 5 run: old crashes, new completes | safe, verified end-to-end |
-| 15 | #15 CatchType 3 index | F.Selex.Inp[,Ifleet,] (zero F fill still open) | none changed (B12 is a demo) | pass (E1 only) | identical | crash fixed; CatchType 3 still needs data |
+| 15 | #15 CatchType 3 index (+ F fill, step 15b) | F.Selex.Inp[,Ifleet,]; F filled from OM.obj$Fleet.F.data | none changed (B12 is a demo) | pass (E1 only) | identical | crash fixed; CatchType 3 still needs data |
 | 16 | #16 Tier 4a map logr | logR | none changed (B20 is a demo) | P.cod Tier 4a: old crashes, new completes | n/a | safe; Tier 4a gives RBC 0 for P.cod in both settings (investigate) |
 | 17 | #17 Parallel drift | **rebuilt** as a thin driver over the current engine (`DoRunParallel`) | – | serial vs parallel, 2 sims E99 | all 11 outputs identical | done (see Additional work) |
 | 18 | #18 CPUE double selectivity | drop SelexAge (already in SelRetWghtAge) | none changed | pass / pass | identical (0/1 selectivity in all inputs) | safe |
@@ -678,3 +678,26 @@ completed (E1 96 s, E2 98 s, E99 102 s).
   more simulations than workers. **All 11 output files are identical** for both simulations.
 - **Verdict:** done. The parallel and serial versions give the same results and can no longer
   drift apart.
+
+### Step 15b (done): bug #15, `CatchType` 3 input F restored (`ReadIn.R:1090`)
+- **Change:** `F.Selex.Inp` is now filled from `OM.obj$Fleet.F.data`. This is the year × fleet
+  F from the SS assessment, which `CreateInputs SingleSpecies.R` stores in the `.OM.SAV`.
+  It restores André's commented-out "AEP FIX" code. Each area open to the fleet
+  (`UseFleet`) gets the same F; **how F should be split across areas is for André to
+  confirm.** The step-15 index fix in `ReviewFsolver` was already in place.
+- **Test:** a copy of Silver.warehou with `#Catches:Project_type 3` (`Temp/CatchType3Inputs/`).
+  - **With the input's initial-depletion target (0.6):** the run completes, but historical
+    catches are **10× the input catches**. With F fixed, depletion doesn't depend on R0
+    (0.570 at every step), so the R0 search in `DoRun` runs to its upper limit (R0
+    multiplier 9.99) and catches scale with R0.
+    **`CatchType` 3 cannot be combined with `# Initial depletion`.** A check or an error
+    message in `DoRun` for that combination would be a useful addition (not made).
+  - **Without the depletion target:** historical catches equal the input catches **exactly
+    for 1980–2022** (ratio 1.000), +4% in 2023, and **0 in 2024–2025**. 2025 depletion is
+    52.4% against 56.3% for the catch-driven run.
+  - The zeros come from the input: `Fleet.F.data` has F = 0 for the last two years in
+    Silver.warehou's `.SAV`, although the catch there is 141 t. **The F extraction in
+    `CreateInputs SingleSpecies.R` (lines ~752–764) should be checked for the final years.**
+- **Smoke test:** E1 (`CatchType 1`) is identical.
+- **Verdict:** done. `CatchType` 3 now runs and reproduces the assessment's catches. It needs
+  (a) no depletion tuning, and (b) complete F inputs for the last years.

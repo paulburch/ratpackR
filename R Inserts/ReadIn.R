@@ -1088,6 +1088,10 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
   #for (Ifleet in 1:General$Ncat_fleet)
   # for (Iyear in 1:Nhist)
   #  F.Selex.Inp[Open.fleets[Ifleet],Ifleet,Iyear] <- OM.obj$Fleet.F.data[Iyear,Ifleet] 
+  # FIX #15: fill the input F from the SS assessment (OM.obj from the .OM.SAV file); same F in every area open to the fleet
+  if (exists("OM.obj") && !is.null(OM.obj$Fleet.F.data))
+   for (Iarea in 1:Narea) for (Ifleet in 1:General$Ncat_fleet) for (Iyear in 1:Nhist)
+    F.Selex.Inp[Iarea,Ifleet,Iyear] <- OM.obj$Fleet.F.data[Iyear,Ifleet]*StockDetails$UseFleet[Iarea,Ifleet,Iyear]
   StockDetails$F.Selex.Inp <- F.Selex.Inp
   if (FullOutput==T) cat("Done: Catch\n")
 
