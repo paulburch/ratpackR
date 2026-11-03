@@ -1347,7 +1347,7 @@ Write_forecast <- function(Folder,Istock,Year)
   
   file.name <- paste0(Folder,"forecast.ss")
   #print(file.name)
-  write(paste0("# forecast.ss for",Folder,"\n"),file=file.name,append=T)
+  write(paste0("# forecast.ss for",Folder,"\n"),file=file.name)   # FIX #39: start a new file (was append=T)
   
   write("# for all year entries except rebuilder; enter either: actual year, -999 for styr, 0 for endyr, neg number for rel. endyr",file=file.name,append=T)
   write("1 # Benchmarks: 0=skip; 1=calc F_spr,F_btgt,F_msy; 2=calc F_spr,F0.1,F_msy; 3=add F_Blimit; ",file=file.name,append=T)
@@ -1402,7 +1402,7 @@ Write_forecast <- function(Folder,Istock,Year)
   write("1 # Value multiplier is ignored",file=file.name,append=T)
   write("0 # not used",file=file.name,append=T)
   write("#",file=file.name,append=T)
-  write("2019  # FirstYear for caps and allocations (should be after years with fixed inputs) ",file=file.name,append=T)
+  write(paste0(Year+Stock[[Istock]]$YrOffset+1,"  # FirstYear for caps and allocations (should be after years with fixed inputs) "),file=file.name,append=T)   # FIX #39: was hard-coded 2019
   write("0 # stddev of log(realized catch/target catch) in forecast (set value>0.0 to cause active impl_error)",file=file.name,append=T)
   write("0 # Do West Coast gfish rebuilder output: 0=no; 1=yes ",file=file.name,append=T)
   write("0 # Rebuilder:  first year catch could have been set to zero (Ydecl)(-1 to set to 1999)",file=file.name,append=T)

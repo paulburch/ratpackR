@@ -77,6 +77,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 36 | S#36 deterministic ages not normalised | Nsamp×Expected/sum | none changed | pass / pass | E1 identical; E2 parameters ≤1.9e-5 rel., TAC identical | safe |
 | 37 | S#37 CAA seeds | use CAA.seeds | none changed | pass (E1); CAA copy runs, length bins resampled independently | identical | safe |
 | 38 | S#38 env-index tautology | no change (intent unclear) | – | – | – | for André |
+| 39 | S#39 forecast.ss append / 2019 | new file; caps year = Year+YrOffset+1 | none changed | pass / pass | identical | safe |
 
 ## Notes per step
 
@@ -533,4 +534,11 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   *every* index when there are no predators. The intended condition (which index carries the
   heatwave signal) isn't clear from the code, so this is **left for André**.
 
-
+### Step 39: suspected #39, `forecast.ss` append and hard-coded 2019 (`Assessment.R:1350, 1405`)
+- **Change:** the first `write()` of `forecast.ss` no longer uses `append=T`, so a re-used
+  folder can't get two concatenated forecast files. "FirstYear for caps and allocations" is
+  now `Year+YrOffset+1` (2026 in the smoke test) instead of the hard-coded 2019.
+- **Smoke tests:** E1 96 s and E2 98 s, both exit 0. Outputs are identical; E2 was compared with
+  step 36. No caps or allocations are defined, so the year doesn't affect the forecast here.
+- **Checks:** none changed.
+- **Verdict:** safe.
