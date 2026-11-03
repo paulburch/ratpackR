@@ -196,8 +196,8 @@ HybridA <- function(Istock,Year,Cat.H,Initial.Eqn=F,Use.Profit.constraint="No")
   SelAge.H <- array(Stock[[Istock]]$SelAge[,,,Year],dim=c(General$Nfleet,Nsex,MaxAge))
   SelRetWght.H <- array(Stock[[Istock]]$SelRetWghtAge[,,,Year],dim=c(General$Nfleet,Nsex,MaxAge))
   # Weird SS thing about initial conditions
-  if (Initial.Eqn==T) SelAge.H <- array(Stock[[Istock]]$SelAge[,,,Stock[[1]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
-  if (Initial.Eqn==T) SelRetWght.H <- array(Stock[[Istock]]$SelRetWghtAge[,,,Stock[[1]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
+  if (Initial.Eqn==T) SelAge.H <- array(Stock[[Istock]]$SelAge[,,,Stock[[Istock]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
+  if (Initial.Eqn==T) SelRetWght.H <- array(Stock[[Istock]]$SelRetWghtAge[,,,Stock[[Istock]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
 
   # Output of the routine
   Fout <- matrix(0,nrow=Narea,ncol=Ncat_fleet)
@@ -277,8 +277,8 @@ Hybrid <- function(Istock,Year,Iarea,Cat.H2,Initial.Eqn=F)
  SelAge.H <- array(Stock[[Istock]]$SelAge[,,,Year],dim=c(General$Nfleet,Nsex,MaxAge))
  SelRetWght.H <- array(Stock[[Istock]]$SelRetWghtAge[,,,Year],dim=c(General$Nfleet,Nsex,MaxAge))
  # Weird SS thing about initial conditions
- if (Initial.Eqn==T) SelAge.H <- array(Stock[[Istock]]$SelAge[,,,Stock[[1]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
- if (Initial.Eqn==T) SelRetWght.H <- array(Stock[[Istock]]$SelRetWghtAge[,,,Stock[[1]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
+ if (Initial.Eqn==T) SelAge.H <- array(Stock[[Istock]]$SelAge[,,,Stock[[Istock]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
+ if (Initial.Eqn==T) SelRetWght.H <- array(Stock[[Istock]]$SelRetWghtAge[,,,Stock[[Istock]]$Nhist],dim=c(Nfleet,Nsex,MaxAge))
 
  # Set fully-selected fishing mortality
  Fout <- rep(0,Ncat_fleet)

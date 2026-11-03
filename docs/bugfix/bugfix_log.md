@@ -67,6 +67,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 24 | #24 WriteInsurance totals | rep(0,41) | none changed | pass (E1) | identical; 48 warnings gone | safe |
 | 25 | S#25 + S#26 implementation-error block | per-stock TAC.management test; TACsStep[6] = implemented TAC | none changed | pass / pass | identical; with impl. error on, Target_catch NA → 3048.7 t | safe |
 | 27 | S#27 area linear indexing (equilibrium block) | [Iarea,...] indexing | none changed | pass (E1); equilibrium-catch copy runs, old = new | identical (1 area) | safe; Assessment.R parts left (design) |
+| 28 | S#28 Stock[[1]]$Nhist | Stock[[Istock]]$Nhist | none changed | pass (E1) | identical | safe |
 
 ## Notes per step
 
@@ -411,3 +412,9 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke test:** E1, 93 s, exit 0. Outputs are identical.
 - **Verdict:** safe. It only changes results with several areas, which can't be run
   end to end.
+
+### Step 28: suspected #28, `Stock[[1]]$Nhist` in `HybridA`/`Hybrid` (`RatpackR.R:198-199, 279-280`)
+- **Change:** `Stock[[Istock]]$Nhist` (4 references, used with `Initial.Eqn=T`).
+- **Checks:** none changed.
+- **Smoke test:** E1, 90 s, exit 0. Outputs are identical (single stock).
+- **Verdict:** safe; it only matters for multi-stock runs where stocks have different `Nhist`.
