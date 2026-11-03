@@ -41,6 +41,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | Step | Bug | Fix | Checks | Smoke E1/E2 | Outputs changed | Verdict |
 |---|---|---|---|---|---|---|
 | 0 | – | baseline (unfixed) | 20 CONFIRMED | pass / pass (E99 pass) | – (repeat run identical) | – |
+| 1 | #1 FixedCosts NA | default 0 if 5th value absent | B02, B02b fixed; others unchanged | pass / pass | Cost/Profit columns NA → numbers only | safe |
 
 ## Notes per step
 
@@ -49,3 +50,14 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - All 20 checks CONFIRMED; B19 is INFO only.
 - **Repeatability:** re-running E1 on unchanged code gave identical output in all 11 files,
   so every difference in later steps is caused by the fix.
+
+### Step 1: bug #1, `FixedCosts` (`ReadIn.R:1730`)
+- **Change:** read the 5th economic value with `suppressWarnings`, and keep the default 0 when it
+  is absent or non-numeric. The current 4-column inputs and future 5-column inputs both work.
+- **Checks:** B02 and B02b changed to NOT REPRODUCED. No other check changed.
+- **Smoke tests:** E1 87 s and E2 92 s, both exit 0.
+- **Outputs:** only cost and profit columns changed, and only from `NA` to numbers. These are
+  `ProjectAll` columns 13–14, 10 columns in `ProjectFleet` and `ProjectFleetArea`, and 65 in
+  `ProjectIns`. No other value changed anywhere. In the first historical year of E2, Cost is
+  7.6e-6 and Profit 0.059; these are placeholder economics, with all inputs set to 1.
+- **Verdict:** safe; nothing else breaks.

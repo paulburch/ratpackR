@@ -1727,7 +1727,8 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
       StockDetails$CostPerDay[Ifleet] <- as.numeric(AllInput[Index+Ifleet,2])
       StockDetails$DaysPerF1[Ifleet] <- as.numeric(AllInput[Index+Ifleet,3])
       StockDetails$DaysPerF2[Ifleet] <- as.numeric(AllInput[Index+Ifleet,4])
-      StockDetails$FixedCosts[Ifleet] <- as.numeric(AllInput[Index+Ifleet,5])
+      FixedCost <- suppressWarnings(as.numeric(AllInput[Index+Ifleet,5]))   # FIX #1: 5th value optional (default 0)
+      if (!is.na(FixedCost)) StockDetails$FixedCosts[Ifleet] <- FixedCost
     }
   }
   StockDetails$Revenue <- array(0,dim=c(Narea,General$Ncat_fleet,Nhist+General$Nproj+1))
