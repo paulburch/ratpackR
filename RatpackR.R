@@ -26,7 +26,7 @@ SetBuffer <- function(Istock,TACs)
     Time <- (Iyear-1) 
     T.Buffer <- 1.0-Time*Stock[[Istock]]$Ass$Stale.rate
     # Net buffer  
-    Buffer <- max(Stock[[Istock]]$Ass$Min.Buffer,T.Buffer)
+    Buffer <- max(Stock[[Istock]]$Ass$Min.Buffer,Buffer*T.Buffer)   # FIX #2: keep the default buffer (multiplicative; confirm intent)
     TACs[Iyear] <- TACs[Iyear]*Buffer
    }
  

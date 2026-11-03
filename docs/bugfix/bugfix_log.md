@@ -42,6 +42,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 |---|---|---|---|---|---|---|
 | 0 | – | baseline (unfixed) | 20 CONFIRMED | pass / pass (E99 pass) | – (repeat run identical) | – |
 | 1 | #1 FixedCosts NA | default 0 if 5th value absent | B02, B02b fixed; others unchanged | pass / pass | Cost/Profit columns NA → numbers only | safe |
+| 2 | #2 SetBuffer | Buffer = max(Min, Buffer×TimeBuffer) (intent to confirm) | B01 fixed; others unchanged | pass / pass | 2026 TAC ×0.9 (6727→6054 t E1); 2027 state follows | works; changes buffer-study TACs |
 
 ## Notes per step
 
@@ -61,3 +62,16 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   `ProjectIns`. No other value changed anywhere. In the first historical year of E2, Cost is
   7.6e-6 and Profit 0.059; these are placeholder economics, with all inputs set to 1.
 - **Verdict:** safe; nothing else breaks.
+
+### Step 2: bug #2, `SetBuffer` (`RatpackR.R:29`)
+- **Change:** `Buffer <- max(Min.Buffer, Buffer*T.Buffer)`. This **assumes the default and
+  time buffers multiply**; André should confirm. The alternative is `Buffer - Time*Stale.rate`.
+- **Checks:** B01 changed to NOT REPRODUCED. No other check changed.
+- **Smoke tests:** E1 88 s and E2 92 s, both exit 0.
+- **Outputs:** only the projection rows changed (2026 and 2027). The 2026 post-buffer TAC is
+  now exactly 0.9 × the retained TAC: E1 6726.6 → 6053.9 t, E2 2147.5 → 1932.8 t. The 2026
+  catch and the 2027 stock state change as a result, by 10–12%. RBCs and the historical
+  period are identical.
+- **Verdict:** works as intended, with no side effects. **This changes TACs in the
+  buffer-study inputs** (`Inputs Buffer/Silver.warehou.EM`, default 0.9). Any earlier buffer
+  results with that file did not include the 0.9 default.
