@@ -56,6 +56,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 13 | #13 DataGen discard ages | Stock[[Istock]]...[Iarea,...] | none changed (B07 is a demo) | pass (E1 only) | identical; with discard ages on: old code crashes, new code runs | safe, verified end-to-end |
 | 14 | #14 Tier 5 / no TAC management crash | TAC array set to 0 (F from F.fix) | none changed | pass / pass | identical; Tier 5 run: old crashes, new completes | safe, verified end-to-end |
 | 15 | #15 CatchType 3 index | F.Selex.Inp[,Ifleet,] (zero F fill still open) | none changed (B12 is a demo) | pass (E1 only) | identical | crash fixed; CatchType 3 still needs data |
+| 16 | #16 Tier 4a map logr | logR | none changed (B20 is a demo) | P.cod Tier 4a: old crashes, new completes | n/a | safe; Tier 4a gives RBC 0 for P.cod in both settings (investigate) |
 
 ## Notes per step
 
@@ -247,3 +248,21 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke test:** E1 only, 90 s, exit 0. Outputs are identical; multispecies and
   `CatchType` 3 are not used.
 - **Verdict:** safe, but only the crash is fixed; `CatchType` 3 is still unusable.
+
+### Step 16: bug #16, Tier 4a `map` names `logr` (`Assessment.R:2126`)
+- **Change:** `map <- list(logR=factor(NA))`.
+- **Smoke script:** `RunStreams/RunSmokeTest.R` takes an optional 4th argument, the species,
+  so other stocks can be tested.
+- **End-to-end test:** P.cod (`Inputs Other/`), switched to `#Ass_Basic:Type Tier_4a` with
+  `EstR No` and `EstZ Yes` (`Temp/Tier4aInputs/`):
+  - **old code:** the run stops with `Names in map must correspond to parameter names`;
+  - **fixed code:** the run completes (32 s).
+- **Checks:** none changed. B20 calls `MakeADFun` directly with the bad name.
+- **Observation (not caused by the fix):** both the fixed `EstR No/EstZ Yes` run and P.cod's
+  own `EstR Yes/EstZ No` setting give **RBC = 0** in 2025, with `sdreport` warnings
+  (`NaNs produced` in `sqrt(diag(cov))`). True 2025 depletion is 25%, between `alpha` (20%)
+  and `beta` (35%), so with a good estimate the RBC should be positive. **The Tier 4a fit for
+  P.cod should be checked**: it may underestimate depletion, or the Hessian may be singular.
+  It is added to the review as a suspected issue.
+- **Verdict:** safe; the crash is fixed. The Tier 4a performance for P.cod needs a separate
+  look.

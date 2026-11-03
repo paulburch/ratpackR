@@ -2123,7 +2123,7 @@ Run_Tier4a<- function(Isim,Istock,Year,Plot=T)
   
   if (EstR=="No"  & EstZ=="No" ) map <- list(logz=factor(NA),logR=factor(NA))
   if (EstR=="Yes" & EstZ=="No" ) map <- list(logz=factor(NA))
-  if (EstR=="No"  & EstZ=="Yes") map <- list(logr=factor(NA))
+  if (EstR=="No"  & EstZ=="Yes") map <- list(logR=factor(NA))
   if (EstR=="Yes" & EstZ=="Yes") map <- NULL
   if (ProcessError==0) map <- c(map,list(logSigmaR=factor(NA),Rec_dev=rep(factor(NA),length(parameters$Rec_dev))))
   if (ProcessError==1) map <- c(map,list(logSigmaR=factor(NA)))

@@ -7,7 +7,7 @@
 # "Inputs Buffer/" (the RunBuffer.R set-up) is used by default.
 #
 # Usage (from the repo root):
-#   Rscript RunStreams/RunSmokeTest.R [Estimation.test] [Nproj] [source input folder]
+#   Rscript RunStreams/RunSmokeTest.R [Estimation.test] [Nproj] [source input folder] [species]
 #   e.g. Rscript RunStreams/RunSmokeTest.R 1 1    # no estimation
 #        Rscript RunStreams/RunSmokeTest.R 2 1    # deterministic data, with estimation
 rm(list=ls())
@@ -19,7 +19,7 @@ args <- commandArgs(trailingOnly = TRUE)
 Estimation.test <- if (length(args) >= 1) as.numeric(args[1]) else 1
 NPROJ <- if (length(args) >= 2) as.numeric(args[2]) else 1
 Source.Folder <- if (length(args) >= 3) args[3] else "Inputs Buffer/"
-Species <- "Silver.warehou"
+Species <- if (length(args) >= 4) args[4] else "Silver.warehou"
 
 library(r4ss)
 library(RTMB)
