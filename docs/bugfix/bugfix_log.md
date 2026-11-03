@@ -46,6 +46,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 3 | #3 clean-up never runs | `!Estimation.test %in% 99` → `Estimation.test %in% 99` | none changed | pass / pass (E99 pass) | E1/E2 identical; E99 folder 11 MB → 1.7 MB | safe |
 | 4 | #4 Istocks loop | loop variable Istock | B09 fixed; others unchanged | pass / pass | identical (single stock) | safe; multi-stock untested end-to-end |
 | 5 | #5 PGMSY 0/0 | zero-catch linked fleet treated as unlinked | B14 fixed; others unchanged | pass / pass | identical (PGMSY off) | safe; rule to confirm |
+| 6 | #6 TAC.mat byrow | no byrow, only own areas | none changed (B08 is a stand-alone replica; new expression verified separately) | pass / pass | identical (NassArea 1) | safe |
 
 ## Notes per step
 
@@ -116,3 +117,13 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke tests:** E1 89 s and E2 92 s, both exit 0. Outputs are identical (single stock,
   PGMSY off).
 - **Verdict:** safe. Carrying over the TAC is a design choice; André may prefer another rule.
+
+### Step 6: bug #6, `TAC.mat` reshape (`RatpackR.R:1344, 1365`)
+- **Change:** `matrix(TACs[Istock,1:NassArea,,1], nrow=NassArea, ncol=Ncat_fleet)`, without
+  `byrow=T` and limited to the stock's own assessment areas.
+- **Checks:** none changed. B08 reproduces the old expression in isolation, so it still says
+  CONFIRMED. The new expression was checked separately: two areas with fleet TACs (10,20,30)
+  and (1,2,3) give (11, 22, 33), and a stock with fewer areas than `MaxAssArea` gives
+  (10, 20, 30).
+- **Smoke tests:** E1 89 s and E2 93 s, both exit 0. Outputs are identical (`NassArea = 1`).
+- **Verdict:** safe.

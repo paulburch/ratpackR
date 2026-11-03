@@ -1341,7 +1341,7 @@ Do.Project <- function(Isim)
         if (Stock[[Istock]]$Ass$TAC.management=="Yes")
          {
           print(TACs[Istock,,,1])
-          TAC.mat <- matrix(TACs[Istock,,,1],nrow=Stock[[Istock]]$NassArea,ncol=Ncat_fleet,byrow=T)
+          TAC.mat <- matrix(TACs[Istock,1:Stock[[Istock]]$NassArea,,1],nrow=Stock[[Istock]]$NassArea,ncol=Ncat_fleet)   # FIX #6: was byrow=T over all MaxAssArea
           TheCat <- apply(TAC.mat,2,sum)
           Fout <- HybridA(Istock,Iyear,TheCat,Use.Profit.constraint=General$Use.Profit.constraint)
          }
@@ -1362,7 +1362,7 @@ Do.Project <- function(Isim)
        if (General$Species.Hybrid[Istock]=="Yes")
         {
          Iyear <- Stock[[Istock]]$Nhist+Jyear
-         TAC.mat <- matrix(TACs[Istock,,,1],nrow=Stock[[Istock]]$NassArea,ncol=Ncat_fleet,byrow=T)
+         TAC.mat <- matrix(TACs[Istock,1:Stock[[Istock]]$NassArea,,1],nrow=Stock[[Istock]]$NassArea,ncol=Ncat_fleet)   # FIX #6: was byrow=T over all MaxAssArea
          TheCat <- apply(TAC.mat,2,sum)
          Fout <- HybridA(Istock,Iyear,TheCat,Use.Profit.constraint=General$Use.Profit.constraint)
          for (Iarea in 1:Narea) for (Ifleet in 1:Ncat_fleet) Stock[[Istock]]$FullF[Iarea,Ifleet,Iyear] <<- Fout[Iarea,Ifleet]
