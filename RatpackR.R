@@ -75,8 +75,9 @@ PGMSY <- function(TACs,Iyear,Years=c(1,2))
         # Which stock do we use to link to this fleet
         Jstock <- General$PGMSY.Primary.Species.by.fleet[Ifleet]
         # There is no species linked to this species - just carry over the TAC
-        if (Jstock == 0) Revised.catch[Istock] <- Revised.catch[Istock] + sum(TACs[Istock,,Ifleet,YYEAR])
-        if (Jstock > 0)
+        # FIX #5: a fleet whose primary stock had no recent catch is treated like an unlinked fleet (was 0/0 or x/0)
+        if (Jstock == 0 || Catch.Comp[Ifleet,max(1,Jstock)] <= 0) Revised.catch[Istock] <- Revised.catch[Istock] + sum(TACs[Istock,,Ifleet,YYEAR])
+        if (Jstock > 0 && Catch.Comp[Ifleet,max(1,Jstock)] > 0)
          {
           # Ratio of the TAC to the average catch
           Proportion <- sum(TACs[Jstock,,Ifleet,YYEAR])/Catch.Comp[Ifleet,Jstock]

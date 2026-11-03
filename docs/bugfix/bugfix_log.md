@@ -45,6 +45,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 2 | #2 SetBuffer | Buffer = max(Min, Buffer×TimeBuffer) (intent to confirm) | B01 fixed; others unchanged | pass / pass | 2026 TAC ×0.9 (6727→6054 t E1); 2027 state follows | works; changes buffer-study TACs |
 | 3 | #3 clean-up never runs | `!Estimation.test %in% 99` → `Estimation.test %in% 99` | none changed | pass / pass (E99 pass) | E1/E2 identical; E99 folder 11 MB → 1.7 MB | safe |
 | 4 | #4 Istocks loop | loop variable Istock | B09 fixed; others unchanged | pass / pass | identical (single stock) | safe; multi-stock untested end-to-end |
+| 5 | #5 PGMSY 0/0 | zero-catch linked fleet treated as unlinked | B14 fixed; others unchanged | pass / pass | identical (PGMSY off) | safe; rule to confirm |
 
 ## Notes per step
 
@@ -101,3 +102,17 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   run end to end, because there are no complete multi-stock inputs.
 - **Verdict:** safe for single-stock runs; the multi-stock behaviour is untested beyond the
   code check.
+
+### Step 5: bug #5, PGMSY divides by zero (`RatpackR.R:78-79`)
+- **Change:** a fleet linked to a primary stock with zero recent catch on that fleet
+  (`Catch.Comp == 0`) is treated like an unlinked fleet: its TAC for the bycatch stock is
+  carried over.
+- **Checks:** B14 changed to NOT REPRODUCED.
+  - With the zero-catch fleet's TAC at 0, there is no longer a crash.
+  - With that TAC at 1 t, the primary TAC becomes (66.7, 0.67) instead of (0, 0). That is
+    ordinary PGMSY scaling: the bycatch stock's predicted catch is 10 t on fleet 1 plus
+    5 t carried over on fleet 2, against its 10 t TAC, giving a factor of 2/3.
+  - No other check changed.
+- **Smoke tests:** E1 89 s and E2 92 s, both exit 0. Outputs are identical (single stock,
+  PGMSY off).
+- **Verdict:** safe. Carrying over the TAC is a design choice; André may prefer another rule.
