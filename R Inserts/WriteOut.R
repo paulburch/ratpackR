@@ -301,7 +301,7 @@ WriteProjFiles <- function(Isim,Istock,ProjSumSaveName,ProjSaveName,ProjSumAreaS
     for (Iarea in 1:General$Narea)  
      {
       VecOut0 <- c(Istock,Iarea,Isim,Year+YrOffset,Period)
-      VecOut0 <- c(VecOut0,sum(Stock[[Istock]]$CatchRetained[Iarea,,Year]),sum(Stock[[Istock]]$CatchDiscardl[Iarea,,Year]),sum(Stock[[Istock]]$CatchTotal[Iarea,,Year]))
+      VecOut0 <- c(VecOut0,sum(Stock[[Istock]]$CatchRetained[Iarea,,Year]),sum(Stock[[Istock]]$CatchDiscard[Iarea,,Year]),sum(Stock[[Istock]]$CatchTotal[Iarea,,Year]))
       VecOut0 <- c(VecOut0,Stock[[Istock]]$SSB[Iarea,Year],Stock[[Istock]]$Depletion[Iarea,Year]*100,
                    Stock[[Istock]]$Recr[Iarea,Year],Stock[[Istock]]$Rec_devs[Iarea,Year])    
       Totals <- rep(0,7)
@@ -313,7 +313,7 @@ WriteProjFiles <- function(Isim,Istock,ProjSumSaveName,ProjSaveName,ProjSumAreaS
         Revenue    <- Stock[[Istock]]$Revenue[Iarea,Ifleet,Year]
         Cost <- Stock[[Istock]]$Cost[Iarea,Ifleet,Year]
         Profit <- Revenue - Cost
-        Outputs <- c(Stock[[Istock]]$Full[Iarea,Ifleet,Year],RetCatch,Discard,TotCatch,Revenue,Cost,Profit)
+        Outputs <- c(Stock[[Istock]]$FullF[Iarea,Ifleet,Year],RetCatch,Discard,TotCatch,Revenue,Cost,Profit)
         Totals <- Totals + Outputs
         VecOut0 <- c(VecOut0,Outputs)
        }

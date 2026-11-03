@@ -59,6 +59,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 16 | #16 Tier 4a map logr | logR | none changed (B20 is a demo) | P.cod Tier 4a: old crashes, new completes | n/a | safe; Tier 4a gives RBC 0 for P.cod in both settings (investigate) |
 | 17 | #17 Parallel drift | not attempted (needs a rebuild of the parallel files) | – | – | – | open |
 | 18 | #18 CPUE double selectivity | drop SelexAge (already in SelRetWghtAge) | none changed | pass / pass | identical (0/1 selectivity in all inputs) | safe |
+| 19 | #19 CatchDiscardl typo | CatchDiscard; $Full → $FullF | none changed | pass (E1) | ProjectFleetArea discards 0 → 6792 t (= ProjectAll) | safe |
 
 ## Notes per step
 
@@ -306,3 +307,12 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   - new observation: Tier 4a gives RBC 0 for P.cod.
 - **Not started:** the Low-severity items (#19–#24, plus the suspected list), pending Paul's
   go-ahead.
+
+### Step 19: bug #19, `CatchDiscardl` typo (`WriteOut.R:304`, also `$Full` at 316)
+- **Change:** `CatchDiscardl` becomes `CatchDiscard`. `$Full` becomes `$FullF`; it only worked
+  through partial matching.
+- **Checks:** none changed.
+- **Smoke test:** E1, 98 s, exit 0. Only `ProjectFleetArea` changed: the per-area discard
+  column now totals **6792 t** over the historical years (it was 0), matching the
+  `ProjectAll` discards. No other file changed.
+- **Verdict:** safe; an output-only fix.
