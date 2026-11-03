@@ -69,6 +69,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 27 | S#27 area linear indexing (equilibrium block) | [Iarea,...] indexing | none changed | pass (E1); equilibrium-catch copy runs, old = new | identical (1 area) | safe; Assessment.R parts left (design) |
 | 28 | S#28 Stock[[1]]$Nhist | Stock[[Istock]]$Nhist | none changed | pass (E1) | identical | safe |
 | 29 | S#29 HybridA all areas closed (**now confirmed**) | skip normalisation when no open area (no catch) | none changed | pass (E1); closed-area copy: old crashes, new runs (catch 0) | identical | safe |
+| 30 | S#30 MSY not 2/3 | explicit stop() with message | none changed | pass (E1); MSY 1 copy: clear error instead of "Fout not found" | identical | safe |
 
 ## Notes per step
 
@@ -433,3 +434,13 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Checks:** none changed.
 - **Smoke test:** E1, 89 s, exit 0. Outputs are identical.
 - **Verdict:** safe; closed-area scenarios now run.
+
+### Step 30: suspected #30, `Fout` undefined if `#MSY` is not 2 or 3 (`RatpackR.R:386`)
+- **Test:** a copy of Silver.warehou with `#MSY 1` (`Temp/MSY1Inputs/`):
+  - **old code:** stops with `object 'Fout' not found`;
+  - **fixed code:** stops with `#MSY in the .OM file must be 2 (F at SPR target) or 3 (F at SSB
+    target); found 1`.
+- **Change:** a `stop()` with that message, added after the two `if` lines.
+- **Checks:** none changed.
+- **Smoke test:** E1, 92 s, exit 0. Outputs are identical.
+- **Verdict:** safe; it only improves the error message. All current inputs use `#MSY 3`.

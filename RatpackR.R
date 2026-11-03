@@ -384,6 +384,7 @@ Project.One.Ahead <- function(Istock,Iyear)
     # Set the SPR
     if (Stock[[Istock]]$MSY==2) Fout <- MeanF*Fmult*Outs$Ftar_SPR
     if (Stock[[Istock]]$MSY==3) Fout <- MeanF*Fmult*Outs$Ftar_SSB
+    if (!Stock[[Istock]]$MSY %in% c(2,3)) stop("#MSY in the .OM file must be 2 (F at SPR target) or 3 (F at SSB target); found ",Stock[[Istock]]$MSY)   # FIX #30
     
     # Storage for catches
     CatchTotalRBC <- 0
