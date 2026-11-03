@@ -2244,6 +2244,27 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
   Index <- which(AssInput[,1]=="#Tier_4b:Cpue_Yr2");          if (length(Index)!=0) Ass$Tier4b$Cpue_Yr2 <- as.numeric(AssInput[Index,2])
   
   if (FullOutput==T) cat("Done: Assessment Tier 4b (Traditional Tier 4)\n")
+
+  # Tier DD specifications (Fournier-Doonan delay-difference; R Inserts/DelayDiff.R)
+  # "#Tier_DD:<name> value(s)"; two values = prior mean and SD (SD <= 0: no prior).
+  # NA defaults are species-specific and must be given when Type is Tier_DD.
+  Ass$DD <- list(Cpue_Area=1, Cpue_Index=1, Len_Area=1, Len_Fleet=1, Len_Part=0, MaxNsamp=1000,
+                 kage=NA, Amax=100, gamma_sr=1, sigmaC=0.05, sigmaE=0.3, sigmaR=0.6,
+                 lamM=0, lamL=c(1,1,1,1), Rho=c(NA,NA), Surv=c(NA,NA), Entry=c(NA,NA), Tauk=c(NA,NA),
+                 Q2=c(0,0.5), Sigtau=NA, Linf_init=NA, beta_init=1, EstBeta="Yes", EstLinf="Yes", EstQ2="No",
+                 MaxLen_g1=0, lamPen=0, B0_init_mult=10, Q1sd=-1, RecDevLead=0, lamRecSum=0, Dlim=0.2, Dtarg=0.48, Htarg=NA)
+  for (Opt in names(Ass$DD))
+   {
+    Index <- which(AssInput[,1]==paste0("#Tier_DD:",Opt))
+    if (length(Index)!=0)
+     {
+      Vals <- unlist(AssInput[Index[1],1+1:length(Ass$DD[[Opt]])])
+      if (is.character(Ass$DD[[Opt]])) Ass$DD[[Opt]] <- as.character(Vals) else Ass$DD[[Opt]] <- as.numeric(Vals)
+     }
+   }
+  if (Ass$Type == "Tier_DD" & any(is.na(unlist(Ass$DD))))
+   stop("Tier_DD: missing in the EM file: ",paste0("#Tier_DD:",names(Ass$DD)[sapply(Ass$DD,function(x) any(is.na(x)))],collapse=" "))
+  if (FullOutput==T) cat("Done: Assessment Tier DD (delay-difference)\n")
   
   #Tier 0 specifications
   Index <- which(AssInput[,1]=="#Tier_0:Fixed");                                     Ass$Prespecified.TAC <- as.numeric(AssInput[Index,2])

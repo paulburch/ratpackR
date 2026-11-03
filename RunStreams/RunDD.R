@@ -1,0 +1,46 @@
+rm(list=ls())
+# Delay-difference EM (Tier_DD, R Inserts/DelayDiff.R) test on Morwong:
+# 1 area, 1 sex.  Inputs DD/ is a copy of the Morwong inputs in Inputs CSIRO/
+# with the EM switched to Tier_DD, 1 simulation, 10 projection years and an
+# assessment every 3 years.  Run from the repository root.
+Path <- paste0(getwd(),"/")
+setwd(Path)
+
+library(r4ss)
+library(RTMB)
+library(RcppArmadillo)
+library(Rcpp)
+
+source("RatpackR.R")
+
+
+# =========================================================================================================================
+# =========================================================================================================================
+
+# Is this a test run
+TestCase <- F
+IsJitter <- F
+Deter.Rec.devs <- F
+Deter.Index.data <- F
+Deter.Discard.data <- F
+Deter.Length.data <- F
+Deter.Age.data <- F
+Huge.sample.sizes <- F
+
+
+# 99 is actual
+FullOutput <- T
+Estimation.test <- 99                  #(0: Development; 1: Deterministic and no estimation ;2: Deterministic;
+                                       #3: Deterministic (incl rec_devs); 5: Huge sample sizes and no estimation;
+                                       #99: Real )
+if (length(commandArgs(trailingOnly=TRUE)) > 0) Estimation.test <- as.numeric(commandArgs(trailingOnly=TRUE)[1])
+
+if (Estimation.test %in% c(1,2)) { Deter.Index.data <- T; Deter.Discard.data <- T; Deter.Length.data <- T; Deter.Age.data <- T }
+if (Estimation.test %in% c(3)) { Deter.Rec.devs <- T; Deter.Index.data <- T; Deter.Discard.data <- T; Deter.Length.data <- T; Deter.Age.data <- T }
+if (Estimation.test %in% c(4)) { Huge.sample.sizes <- T }
+if (Estimation.test %in% c(5)) { Huge.sample.sizes <- T }
+if (Estimation.test %in% c(6)) { Huge.sample.sizes <- T; Deter.Index.data <- T; Deter.Discard.data <- T; Deter.Length.data <- T; Deter.Age.data <- T }
+
+Input.Folder <- "Inputs DD/"
+
+DoRun(GeneralFile="General_Morwong.OM",RunNo="Morwong.DD")

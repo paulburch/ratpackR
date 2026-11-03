@@ -2610,6 +2610,7 @@ Run_Assessment <- function(Isim,Istock,Iarea,Year)
   if (Stock[[Istock]]$Ass$Type=="Tier_1a") TACs <- Run_Tier1a(Isim,Istock,Iarea,Year)
   if (Stock[[Istock]]$Ass$Type=="Tier_4a") TACs <- Run_Tier4a(Isim,Istock,Year)
   if (Stock[[Istock]]$Ass$Type=="Tier_4b") TACs <- Run_Tier4b(Isim,Istock,Year)
+  if (Stock[[Istock]]$Ass$Type=="Tier_DD") TACs <- Run_DelayDiff(Isim,Istock,Year)
   
   # Tier 0: Pre-specified catch
   if (Stock[[Istock]]$Ass$Type=="Tier_0")  
