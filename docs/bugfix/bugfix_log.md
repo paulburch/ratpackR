@@ -75,6 +75,8 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 33–34 | S#33 TAC slot 50; S#34 one-sim return | no change (harmless / intended) | – | – | – | left as is |
 | 35 | S#35 DataGen multi-area discards & CAA | sum over the assessment area's biological areas | none changed | pass / pass; CAA copy: old = new (127 rows) | identical (1 area) | safe; Write_data split left (design) |
 | 36 | S#36 deterministic ages not normalised | Nsamp×Expected/sum | none changed | pass / pass | E1 identical; E2 parameters ≤1.9e-5 rel., TAC identical | safe |
+| 37 | S#37 CAA seeds | use CAA.seeds | none changed | pass (E1); CAA copy runs, length bins resampled independently | identical | safe |
+| 38 | S#38 env-index tautology | no change (intent unclear) | – | – | – | for André |
 
 ## Notes per step
 
@@ -512,3 +514,23 @@ can be rebuilt by re-running the script. The summary of each step is copied into
     optimiser path.
 - **Checks:** none changed.
 - **Verdict:** safe; the data files are now proportions times sample size, as intended.
+
+### Step 37: suspected #37, CAA re-uses the marginal-age seeds (`DataGen.R:164`)
+- **Change:** `set.seed(...$CAA.seeds[...])`. `ReadIn.R` already builds `CAA.seeds`; they were
+  never used.
+- **Not changed:** `NsampLength = CAA.spec/2` can be fractional, and `rmultinom` silently
+  truncates it (2.7 → 2, 0.5 → 0). At most half a fish is lost, so it is left as is and
+  documented.
+- **Smoke test:** E1, 94 s, exit 0. Outputs are identical; the standard inputs have no CAA.
+- **CAA copy** (`Temp/CAAInputs/`): it completes with 127 CAA rows, as before, but **different
+  length bins** are sampled, because of the separate stream. For 2016 the bins were 11, 15,
+  16, 18, … and are now 16, 18, 19, 20, ….
+- **Checks:** none changed.
+- **Verdict:** safe. Marginal ages and CAA are now drawn independently.
+
+### Step 38: suspected #38, environmental-index branch (`Assessment.R:318`), no change
+- `if (Ind != Num.Pred+Ind)` depends only on `Num.Pred`, so the heatwave override is applied to
+  *every* index when there are no predators. The intended condition (which index carries the
+  heatwave signal) isn't clear from the code, so this is **left for André**.
+
+

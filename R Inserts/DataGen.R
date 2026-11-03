@@ -161,7 +161,7 @@ DataGen <- function(Istock,Year,BioPreds)
             else
             {
               # Account for ageing error
-              set.seed(Stock[[Istock]]$Data$Age.seeds[IassArea,Itype,Year,Ifleet])
+              set.seed(Stock[[Istock]]$Data$CAA.seeds[IassArea,Itype,Year,Ifleet])   # FIX #37: CAA has its own seeds (was the marginal-age seeds)
               NsampLength <- Stock[[Istock]]$Data$CAA.spec[IassArea,Itype,Year,Ifleet]/2
               LenSampleSize <- as.vector(rmultinom(1,NsampLength,prob=Expected))
               
