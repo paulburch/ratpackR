@@ -1303,15 +1303,15 @@ Do.Project <- function(Isim)
      }
 
     # Add implementation error
-    if(Stock[[Istock]]$Ass$TAC.management=="Yes")
-     for (Istock in 1:Nstocks)
+    for (Istock in 1:Nstocks)   # FIX #25: TAC.management tested per stock (was tested once, for the last stock)
+     if (Stock[[Istock]]$Ass$TAC.management=="Yes")
       if (Stock[[Istock]]$Use.Implementation.Error!=0)
        {
         if (Stock[[Istock]]$Implementation.Error.Specs[1]==1)
          for (IassArea in 1:Stock[[Istock]]$NassArea)
           TACs[Istock,IassArea,,1] <- TACs[Istock,IassArea,,1]*rbeta(1,Stock[[Istock]]$Implementation.Error.Specs[2],Stock[[Istock]]$Implementation.Error.Specs[3])
         Iyear <- Stock[[Istock]]$Nhist+Jyear
-        Stock[[Istock]]$TACsStep[6,Iyear] <<- Stock[[Istock]]$TACs[Iyear]
+        Stock[[Istock]]$TACsStep[6,Iyear] <<- sum(TACs[Istock,,,1])   # FIX #26: was Stock$TACs[Iyear], which is only set later
        } # If
     
     for(Istock in 1:Nstocks)   # FIX #4: was Istocks

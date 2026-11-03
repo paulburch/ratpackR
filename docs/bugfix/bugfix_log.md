@@ -65,6 +65,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 22 | #22 LengthData seed row | width 7+Nsex*Nlen | B18 fixed; others unchanged | pass (E1) | identical; rbind warning gone | safe |
 | 23 | #23 file.remove showWarnings | argument dropped (calls already guarded) | none changed | pass (E1, E99) | identical; FALSE-file warnings 4 → 0 | safe |
 | 24 | #24 WriteInsurance totals | rep(0,41) | none changed | pass (E1) | identical; 48 warnings gone | safe |
+| 25 | S#25 + S#26 implementation-error block | per-stock TAC.management test; TACsStep[6] = implemented TAC | none changed | pass / pass | identical; with impl. error on, Target_catch NA → 3048.7 t | safe |
 
 ## Notes per step
 
@@ -371,3 +372,23 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke test:** E1, 94 s, exit 0. Outputs are identical; the sums were already correct
   through recycling. All 48 `longer object length` warnings per simulation are gone.
 - **Verdict:** safe. **That completes the Low items (#19–#24).**
+
+## Suspected items (#25–#45)
+
+### Step 25: suspected #25 and #26, implementation-error block (`RatpackR.R:1306-1316`)
+- **#25 change:** the `TAC.management=="Yes"` test moved inside `for (Istock ...)`. Before, it
+  was evaluated once, with `Istock` left over from the previous loop (the last stock).
+- **#26 change:** `TACsStep[6,Iyear] <<- sum(TACs[Istock,,,1])`, the implemented TAC. Before,
+  it copied `Stock$TACs[Iyear]`, which is only set at line ~1396, so it held a stale value or
+  NA.
+- **End-to-end test:** a copy of Silver.warehou with `#Use.Implementation.Err 1` and
+  `#Implementation.Err.Spec 1 20 20` (Beta(20,20) TAC multiplier, mean 0.5;
+  `Temp/ImplErrInputs/`):
+  - **old code:** the 2026 "Target_catch" column (`TACsStep` row 6) is **NA**, while the
+    implemented TAC is 3048.7 t;
+  - **fixed code:** row 6 is **3048.7 t**, equal to the implemented TAC and the retained
+    catch. The other rows are unchanged.
+- **Checks:** none changed.
+- **Smoke tests:** E1 94 s and E2 98 s, both exit 0. Outputs are identical (implementation
+  error off).
+- **Verdict:** safe. #26 is a diagnostic-only fix; #25 matters only for multi-stock runs.
