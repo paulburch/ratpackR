@@ -1001,7 +1001,7 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
   StockDetails$Early.R0.mult <- 0
   Index <- which(AllInput[,1]=="#Early_R0Mult"); StockDetails$Use.Early.R0.mult <- length(Index)
   if (length(Index)>0) StockDetails$Early.R0.mult <- as.numeric(AllInput[Index,2]);
-  StockDetails$Early.R0.mult_end_yrs <- c(0,0)
+  StockDetails$Early.R0.mult.end.yrs <- c(0,0)   # FIX #10: one name (was Early.R0.mult_end_yrs)
   Index <- which(AllInput[,1]=="#Early_R0Mult_Block_end")
   if (length(Index)>0) StockDetails$Early.R0.mult.end.yrs <- as.numeric(AllInput[Index,2:3]);
   Index <- which(AllInput[,1]=="#Late_Devs")

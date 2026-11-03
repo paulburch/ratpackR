@@ -50,6 +50,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 7 | #7 SPR_ref multi-area | destination area, transposed plus group, catch over all areas | B10a, B10c fixed; others unchanged | pass / pass | identical (1 area) | safe |
 | 8 | #8 movement age a-1 vs a | equilibrium code uses Move[,,Iage] like the projection (to confirm) | B10b fixed; others unchanged | pass / pass | identical (1 area) | safe; convention to confirm |
 | 9 | #9 steepness bias | h_init = h × bias (negative = fixed) | B05 fixed; others unchanged | pass / pass | identical (Silver uses fixed h) | safe; watch h bounds >1 |
+| 10 | #10 Early-R0 block-end name | single name .end.yrs with default | B04 fixed; others unchanged | pass / pass | identical | safe |
 
 ## Notes per step
 
@@ -166,4 +167,15 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Side effect to watch:** `Do_Jitter` sets the bounds to value/`Bound_mult` and
   value × `Bound_mult`. A bias above 1, or a large `Bound_mult`, can give an upper bound
   above 1 for h, which SS may reject. This was already possible before the fix.
+- **Verdict:** safe.
+
+### Step 10: bug #10, early-R0 block end name (`ReadIn.R:1004`, `RatpackR.R:1146,1148`)
+- **Change:** one name, `Early.R0.mult.end.yrs`, with default `c(0,0)`. This also stops a
+  latent NULL error at `ReadIn.R:1020` when `#Early_R0Mult` is given without
+  `#Early_R0Mult_Block_end`.
+- **Checks:** B04 changed to NOT REPRODUCED. No other check changed.
+- **Smoke tests:** E1 93 s and E2 94 s, both exit 0. Outputs are identical: Silver.warehou has
+  no early-R0 multiplier.
+- **Note:** Morwong and P.cod use `#Early_R0Mult`, but their block starts at 0 and they have
+  no equilibrium catch, so they follow the same code path as before.
 - **Verdict:** safe.

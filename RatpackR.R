@@ -1146,9 +1146,9 @@ Do.Project <- function(Isim)
        Depl <- Stock[[Istock]]$Depletion[Iarea,1]
        Recr <- 4.0 *Stock[[Istock]]$R00[Iarea]*Stock[[Istock]]$Steep*Depl / ( (1-Stock[[Istock]]$Steep) + (5*Stock[[Istock]]$Steep-1)*Depl)
        # Adjust by early devs
-       if (Stock[[Istock]]$Early.R0.mult_end_yrs[1]!=0) 
+       if (Stock[[Istock]]$Early.R0.mult.end.yrs[1]!=0) 
         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1] <<- Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1]*exp(Stock[[Istock]]$Early.R0.mult+Stock[[Istock]]$EarlyDevs[1:MaxAge])
-       if (Stock[[Istock]]$Early.R0.mult_end_yrs[1]==0) 
+       if (Stock[[Istock]]$Early.R0.mult.end.yrs[1]==0) 
          for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1] <<- Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1]*exp(Stock[[Istock]]$EarlyDevs[1:MaxAge])
        if (Stock[[Istock]]$Use_Steep_in_equ==0)
         {
