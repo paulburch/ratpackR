@@ -1255,7 +1255,7 @@ Do.Project <- function(Isim)
             Stock[[Istock]]$RBC[Stock[[Istock]]$Nhist+Jyear] <<- sum(RBCsOrig[Istock,,1])
            }
           else
-           TACsAdjust1[Istock,IassArea,,] <- TACsOrig[Istock,IassArea,]
+           TACsAdjust1[Istock,IassArea,,] <- 0   # FIX #14: no TAC without TAC management (F comes from Ass$F.fix); was undefined TACsOrig
           TACs[Istock,IassArea,,] <- TACsAdjust1[Istock,IassArea,,]
          } # IassArea  
         Stock[[Istock]]$Last.Assessmnent <<- Stock[[Istock]]$Nhist+Jyear

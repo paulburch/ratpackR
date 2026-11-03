@@ -54,6 +54,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 11 | #11 catch-bias rows | per-fleet row; fill to last model year | B03a, B03b fixed; others unchanged | pass / pass | identical (all biases 1) | safe |
 | 12 | #12 Tier 4b CPUE limit | compare with Cpue.limit | none changed (B06 is a stand-alone demo; rule verified separately) | pass (E1 only) | identical (Tier 4b unused) | safe; not run end-to-end |
 | 13 | #13 DataGen discard ages | Stock[[Istock]]...[Iarea,...] | none changed (B07 is a demo) | pass (E1 only) | identical; with discard ages on: old code crashes, new code runs | safe, verified end-to-end |
+| 14 | #14 Tier 5 / no TAC management crash | TAC array set to 0 (F from F.fix) | none changed | pass / pass | identical; Tier 5 run: old crashes, new completes | safe, verified end-to-end |
 
 ## Notes per step
 
@@ -219,3 +220,19 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   - **fixed code:** the run completes (E1, 81 s), and the 5 discard-age samples
     (partition 1) are written to the SS `data.dat`.
 - **Verdict:** safe; the fix is confirmed by running the branch end to end.
+
+### Step 14: bug #14, no TAC management (Tier 5) uses undefined `TACsOrig` (`RatpackR.R:1258`)
+- **Finding sharpened:** `TAC.management = "No"` is set only for **Tier 5** (`ReadIn.R:2257`),
+  so the crash affects every Tier 5 run.
+- **Change:** `TACsAdjust1[Istock,IassArea,,] <- 0`. With no TAC management there is no TAC;
+  F comes from `Ass$F.fix`, which `Run_Tier5` sets. **Design choice:** 0, rather than NA or an
+  RBC split, so later sums stay finite.
+- **End-to-end test:** a copy of Silver.warehou with `#Ass_Basic:Type Tier_5`,
+  `#Tier_5:Option 1` (mean F) and `#Tier_5:Years 2015 2020` (`Temp/Tier5Inputs/`):
+  - **old code:** the run stops with `Error in Do.Project(Isim) : object 'TACsOrig' not found`;
+  - **fixed code:** the run completes (E1, 73 s). The 2026 retained catch is 794 t, from the
+    2015–2020 mean F. The TAC columns are NA, as expected without TAC management.
+- **Checks:** none changed.
+- **Smoke tests:** E1 91 s and E2 95 s, both exit 0. Outputs are identical; E2 was compared
+  with step 11, the last E2 run.
+- **Verdict:** safe. Tier 5 option 1 now runs.
