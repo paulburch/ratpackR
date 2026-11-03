@@ -834,7 +834,7 @@ SPR_ref <- function(Istock,Fmult=0,AveF,Iyear)
      {
        Ntemp <- Neqn[Iarea,Isex,Iage-1] * exp(-Z[Iarea,Isex,Iage-1])
        for (Jarea in 1:Narea)
-         Neqn[Iarea,Isex,Iage] <- Neqn[Iarea,Isex,Iage] + Stock[[Istock]]$Move[Iarea,Jarea,Iage-1]*Ntemp
+         Neqn[Jarea,Isex,Iage] <- Neqn[Jarea,Isex,Iage] + Stock[[Istock]]$Move[Iarea,Jarea,Iage-1]*Ntemp   # FIX #7a: add to the destination area
      } # IAge x Iarea
    
    # Now for the plus-group
@@ -843,6 +843,7 @@ SPR_ref <- function(Istock,Fmult=0,AveF,Iyear)
    for (Iarea in 1:Narea)
     for (Jarea in 1:Narea) 
       Amove[Iarea,Jarea] <- Stock[[Istock]]$Move[Iarea,Jarea,MaxAge]* exp(-Z[Iarea,Isex,MaxAge])
+   Amove <- t(Amove)   # FIX #7b: transpose, as in Get.Initial
    Amove2 <- -1*Amove
    for (Iarea in 1:Narea) Amove2[Iarea,Iarea] <- 1 - Amove[Iarea,Iarea]
    
@@ -850,6 +851,7 @@ SPR_ref <- function(Istock,Fmult=0,AveF,Iyear)
    Neqn[,Isex,MaxAge] <- as.vector(solve(Amove2) %*% VecIn)
    
    # Catch in weight
+   for (Iarea in 1:Narea)   # FIX #7c: was only the last area
    for (Iage in 1:MaxAge)
     { 
      NN <- Neqn[Iarea,Isex,Iage]*(1.0-exp(-Z[Iarea,Isex,Iage]))/Z[Iarea,Isex,Iage]

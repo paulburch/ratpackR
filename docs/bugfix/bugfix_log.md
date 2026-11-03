@@ -47,6 +47,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 4 | #4 Istocks loop | loop variable Istock | B09 fixed; others unchanged | pass / pass | identical (single stock) | safe; multi-stock untested end-to-end |
 | 5 | #5 PGMSY 0/0 | zero-catch linked fleet treated as unlinked | B14 fixed; others unchanged | pass / pass | identical (PGMSY off) | safe; rule to confirm |
 | 6 | #6 TAC.mat byrow | no byrow, only own areas | none changed (B08 is a stand-alone replica; new expression verified separately) | pass / pass | identical (NassArea 1) | safe |
+| 7 | #7 SPR_ref multi-area | destination area, transposed plus group, catch over all areas | B10a, B10c fixed; others unchanged | pass / pass | identical (1 area) | safe |
 
 ## Notes per step
 
@@ -127,3 +128,17 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   (10, 20, 30).
 - **Smoke tests:** E1 89 s and E2 93 s, both exit 0. Outputs are identical (`NassArea = 1`).
 - **Verdict:** safe.
+
+### Step 7: bug #7, `SPR_ref` movement and catch (`RatpackR.R:836-863`)
+- **Change:** three edits:
+  - (a) numbers are added to the destination area, `Neqn[Jarea,...]`;
+  - (b) the plus-group movement matrix is transposed, as in `Get.Initial`;
+  - (c) the catch is summed over all areas (`for (Iarea in 1:Narea)`).
+- **Checks:** B10a and B10c changed to NOT REPRODUCED.
+  - Area 2 now holds 2.985 fish per recruit (it was 0).
+  - Catch with two identical areas is 0.364, exactly 2 × the one-area value of 0.182.
+  - B10b, the movement-age mismatch (bug #8), still fails, as expected. It is also why
+    `SPR_ref`'s 2.985 differs from the projection rule's 2.844.
+- **Smoke tests:** E1 90 s and E2 94 s, both exit 0. Outputs are identical (`Narea = 1`,
+  `Move = 1`).
+- **Verdict:** safe for single-area runs; correct for multi-area runs in the synthetic test.
