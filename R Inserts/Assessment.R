@@ -1230,7 +1230,7 @@ Write_ctl <- function(Folder,Istock,Iarea,Year)
         Bias <- 1
         else 
           if (Iyear < Year+Ass$SS_end_yr_for_ramp+YrOffset)
-            Bias <- (Year+Ass$SS_last_yr_fullbias_adj+YrOffset- Iyr)/(Ass$SS_end_yr_for_ramp-Ass$SS_last_yr_fullbias_adj+YrOffset)
+            Bias <- (Year+Ass$SS_end_yr_for_ramp+YrOffset- Iyear)/(Ass$SS_end_yr_for_ramp-Ass$SS_last_yr_fullbias_adj)   # FIX #20: calendar years throughout; 1 -> 0 between last full-bias year and end of ramp
          else
             Bias <- 0
           #Bias <- Bias*Ass$SS_max_bias_adjust

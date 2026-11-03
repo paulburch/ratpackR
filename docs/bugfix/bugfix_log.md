@@ -60,6 +60,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 17 | #17 Parallel drift | not attempted (needs a rebuild of the parallel files) | – | – | – | open |
 | 18 | #18 CPUE double selectivity | drop SelexAge (already in SelRetWghtAge) | none changed | pass / pass | identical (0/1 selectivity in all inputs) | safe |
 | 19 | #19 CatchDiscardl typo | CatchDiscard; $Full → $FullF | none changed | pass (E1) | ProjectFleetArea discards 0 → 6792 t (= ProjectAll) | safe |
+| 20 | #20 rec-dev bias ramp | calendar years; 1 → 0 over the ramp | none changed (B13 is a demo) | pass / pass | identical | safe |
 
 ## Notes per step
 
@@ -316,3 +317,14 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   column now totals **6792 t** over the historical years (it was 0), matching the
   `ProjectAll` discards. No other file changed.
 - **Verdict:** safe; an output-only fix.
+
+### Step 20: bug #20, descending rec-dev bias ramp (`Assessment.R:1233`)
+- **Change:** `Bias <- (Year+end_ramp+YrOffset - Iyear)/(end_ramp - last_fullbias)`. Calendar
+  years are used throughout, and the ramp falls from 1 at the last full-bias year to 0 at the
+  end of the ramp. The old numerator used the model year `Iyr` and was anchored at the wrong
+  end. For a 6-year ramp the new values are 1, 0.833, 0.667, 0.5, 0.333, 0.167, 0.
+- **Checks:** none changed. B13 evaluates the old formula on its own.
+- **Smoke tests:** E1 97 s and E2 103 s, both exit 0. Outputs are identical to the previous
+  steps; the only E2 difference from step 18 is the step-19 discard column. The branch only
+  affects starting `.par` rec devs, and Silver.warehou never reaches it.
+- **Verdict:** safe.
