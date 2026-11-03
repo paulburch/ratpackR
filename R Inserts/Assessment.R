@@ -695,7 +695,7 @@ Write_ctl <- function(Folder,Istock,Iarea,Year)
   TV <- rep(0,9); TV[1] <- Ass$SR_env_devs[1];  TV[8] <- Ass$SR_blocks[1]; TV[9] <- Ass$SR_block_fns[1]
   cat(Do_Jitter(Istock,1,log(sum(Stock[[Istock]]$R00.orig[Use]*Ass$SR_R0_mult)), Ass$SR_R0_Phase,    Bound_mult,Jitter_SD,0,TV=TV),"# SR_LN(R0)\n",file=file.name,append=T)
   TV <- rep(0,9); TV[1] <- Ass$SR_env_devs[2];  TV[8] <- Ass$SR_blocks[2]; TV[9] <- Ass$SR_block_fns[2]
-  Initial.val <- Ass$SR_Steep; if (Ass$SS_Steep_Bias < 0)  Initial.val <- -1*Ass$SS_Steep_Bias;
+  Initial.val <- Ass$SR_Steep*Ass$SS_Steep_Bias; if (Ass$SS_Steep_Bias < 0)  Initial.val <- -1*Ass$SS_Steep_Bias;
   cat(Do_Jitter(Istock,1,Initial.val,                  Ass$SR_Steep_Phase, Bound_mult,Jitter_SD,0,TV=TV),"# SR_BH_steep\n",file=file.name,append=T)
   TV <- rep(0,9); TV[1] <- Ass$SR_env_devs[3];  TV[8] <- Ass$SR_blocks[3]; TV[9] <- Ass$SR_block_fns[3]
   cat(Do_Jitter(Istock,1,Ass$SR_SigmaR,                 Ass$SR_SigmaR_Phase,Bound_mult,Jitter_SD,0,TV=TV),"# SR_sigmaR\n",file=file.name,append=T)

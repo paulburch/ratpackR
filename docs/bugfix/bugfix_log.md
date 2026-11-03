@@ -49,6 +49,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 6 | #6 TAC.mat byrow | no byrow, only own areas | none changed (B08 is a stand-alone replica; new expression verified separately) | pass / pass | identical (NassArea 1) | safe |
 | 7 | #7 SPR_ref multi-area | destination area, transposed plus group, catch over all areas | B10a, B10c fixed; others unchanged | pass / pass | identical (1 area) | safe |
 | 8 | #8 movement age a-1 vs a | equilibrium code uses Move[,,Iage] like the projection (to confirm) | B10b fixed; others unchanged | pass / pass | identical (1 area) | safe; convention to confirm |
+| 9 | #9 steepness bias | h_init = h × bias (negative = fixed) | B05 fixed; others unchanged | pass / pass | identical (Silver uses fixed h) | safe; watch h bounds >1 |
 
 ## Notes per step
 
@@ -154,3 +155,15 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke tests:** E1 89 s and E2 93 s, both exit 0. Outputs are identical (single area).
 - **Verdict:** safe for single-area runs; consistent across the three routines for multi-area
   runs.
+
+### Step 9: bug #9, steepness bias ignored (`Assessment.R:698`)
+- **Change:** `Initial.val <- Ass$SR_Steep*Ass$SS_Steep_Bias`. Negative values still mean
+  "fix h at |value|", as for M.
+- **Checks:** B05 changed to NOT REPRODUCED. With bias 0.8 and true h 0.75, the EM now starts
+  at h = 0.600. No other check changed.
+- **Smoke tests:** E1 90 s and E2 93 s, both exit 0. Outputs are identical: Silver.warehou
+  uses bias −0.6 (fixed h), which was already handled.
+- **Side effect to watch:** `Do_Jitter` sets the bounds to value/`Bound_mult` and
+  value × `Bound_mult`. A bias above 1, or a large `Bound_mult`, can give an upper bound
+  above 1 for h, which SS may reject. This was already possible before the fix.
+- **Verdict:** safe.
