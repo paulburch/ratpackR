@@ -1,5 +1,5 @@
 rm(list=ls())
-Path <- "C:/Research/NewRat/NewRat_spat/"
+Path <- sub("/*$", "/", Sys.getenv("RATPACK_ROOT", unset = getwd()))
 setwd(Path)
 
 library(r4ss)
@@ -7,7 +7,7 @@ library(RTMB)
 library(RcppArmadillo)
 library(Rcpp)
 
-source("RatPackR.r")
+source("RatpackR.R")
 
 
 # =========================================================================================================================
@@ -39,7 +39,7 @@ if (Estimation.test %in% c(4)) { Huge.sample.sizes <- T }
 if (Estimation.test %in% c(5)) { Huge.sample.sizes <- T }
 if (Estimation.test %in% c(6)) { Huge.sample.sizes <- T; Deter.Index.data <- T; Deter.Discard.data <- T; Deter.Length.data <- T; Deter.Age.data <- T }
 
-Input.Folder <- "Inputs CAITLINM/"
+Input.Folder <- "Inputs CaitLinM/"
 
 Doall <- T
 if (Doall) DoRun(GeneralFile="General_Caitlin.OM",RunNo="Caitlin") # OK

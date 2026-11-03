@@ -82,7 +82,7 @@ Two values are a prior mean and SD; an SD ≤ 0 means no prior. Options marked *
    - compare with Tier_1a and Tier_4a on the same OM, which needs a second EM copy with only `Ass_Basic:Type` changed;
    - then a stock that is less depleted than Morwong, so the HCR is exercised.
 7. **Parallel version.** `R Inserts/Parallel/RatpackR.R` and `Assessment.R` don't have the Tier_DD source line or dispatch yet.
-8. **Linux / cloud.** `RatpackR.R` sources `"R inserts/..."`, but the folder is `R Inserts`, and the new `DelayDiff.R` line follows the same convention. This branch needs the `linux-portability` fixes (on the fork) merged in before a cloud run. `RunDD.R` itself uses the correct `RatpackR.R` case and a working-directory `Path`.
+8. **Linux / cloud.** `linux-portability` is merged into this branch (correct file-name case, `RATPACK_ROOT` paths). To run on Linux, use `docs/cloud_setup.md`: `bash setup_linux.sh`, then `source "$HOME/ratpack-env/activate.sh"`, then `Rscript RunStreams/RunDD.R` from the repository root.
 9. **Tidy-up for Paul.** `C:/_AI/Claude_code/Other_assessments/Fournier_Doonan_1987_delay_difference/` holds the original standalone script, which is now duplicated here.
 
 ## Environment notes

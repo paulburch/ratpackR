@@ -3,7 +3,7 @@ rm(list=ls())
 # 1 area, 1 sex.  Inputs DD/ is a copy of the Morwong inputs in Inputs CSIRO/
 # with the EM switched to Tier_DD, 1 simulation, 10 projection years and an
 # assessment every 3 years.  Run from the repository root.
-Path <- paste0(getwd(),"/")
+Path <- sub("/*$", "/", Sys.getenv("RATPACK_ROOT", unset = getwd()))
 setwd(Path)
 
 library(r4ss)

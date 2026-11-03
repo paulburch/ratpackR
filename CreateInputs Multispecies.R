@@ -1,7 +1,8 @@
 rm(list=ls())
 library(r4ss)
 library(readxl)
-source("C:/Research/NewRat/Newrat_spat/R inserts/SaveFiles.R")
+Repo <- sub("/*$", "/", Sys.getenv("RATPACK_ROOT", unset = getwd()))          # this repository (was C:/Research/NewRat/NewRat_spat/)
+source(paste0(Repo,"R Inserts/SaveFiles.R"))
 
 
 CaseAll <- 1                                               # 1 means try a run (0=mean constant catch)
@@ -816,21 +817,21 @@ DO.Create <- function(Species.Names,FileName)
 Last.TAC.specs <- NULL
 Assessment.Frequency <- NULL
 
-BasePath <- "C:/Research/NewRat/Newrat_spat/"
-InputPath <- "C:/Research/NewRat/Newrat_spat/Inputs CSIRO/"
-OutputPath <- "C:/Research/NewRat/Newrat_spat/Inputs CSIROM/"
+BasePath <- Repo
+InputPath <- paste0(Repo,"Inputs CSIRO/")
+OutputPath <- paste0(Repo,"Inputs CSIROM/")
 Species.Names <- c("Bight redfish","Blue grenadier","Deepwater flathead","Morwong","Orange roughy east","Pink ling","Redfish","School whiting","Silver warehou","Tiger flathead","Mirror dory")
-DO.Create(Species.Names,"fleet-metierv0.csv")
-#DO.Create(Species.Names,"fleet-metierv1.csv")
+DO.Create(Species.Names,"Fleet-metierV0.csv")
+#DO.Create(Species.Names,"Fleet-metierV1.csv")
 
-BasePath <- "C:/Research/NewRat/Newrat_spat/"
-InputPath <- "C:/Research/NewRat/Newrat_spat/Inputs Other/"
-OutputPath <- "C:/Research/NewRat/Newrat_spat/Inputs CaitLinM/"
+BasePath <- Repo
+InputPath <- paste0(Repo,"Inputs Other/")
+OutputPath <- paste0(Repo,"Inputs CaitLinM/")
 Species.Names <- c("Sardine","Mackerel","Anchovy","Squid")
 DO.Create(Species.Names,"Caitlin.csv")
 
-BasePath <- "C:/Research/NewRat/Newrat_spat/"
-InputPath <- "C:/Research/NewRat/Newrat_spat/Inputs Other/"
-OutputPath <- "C:/Research/NewRat/Newrat_spat/Inputs OtherM/"
+BasePath <- Repo
+InputPath <- paste0(Repo,"Inputs Other/")
+OutputPath <- paste0(Repo,"Inputs OtherM/")
 Species.Names <- c("Gummy","Dusky","Whiskery_Shark","Sandbar_shark")
 #DO.Create(Species.Names,"WASharks.csv")

@@ -1,13 +1,13 @@
  
-source("R inserts/Readin.R")
-source("R inserts/WriteOut.R")
-source("R inserts/Assessment.R")
-source("R inserts/DataGen.R")
+source("R Inserts/ReadIn.R")
+source("R Inserts/WriteOut.R")
+source("R Inserts/Assessment.R")
+source("R Inserts/DataGen.R")
 Current_folder <- getwd()
 
 # Compile the model code
 #print("compiling")
-#sourceCpp("R inserts/Model.cpp")
+#sourceCpp("R Inserts/Model.cpp")
 #print("compiled")
 
 
@@ -1501,7 +1501,7 @@ if (!dir.exists(RcppCache)) dir.create(RcppCache)
 env_before <- ls(envir = globalenv())
 
 # 2. Compile the C++ code
-Rcpp::sourceCpp("R inserts/Model.cpp", cacheDir = RcppCache)
+Rcpp::sourceCpp("R Inserts/Model.cpp", cacheDir = RcppCache)
 print("compiled")
 
 # 3. Identify exactly which objects the C++ compiler created
@@ -1641,7 +1641,7 @@ print("projecting")
       setwd(Path)
       # A tiny random sleep prevents all 10 workers hitting the cache read at the exact same millisecond
       Sys.sleep(runif(1, 0, 2))
-      Rcpp::sourceCpp("R inserts/Model.cpp", cacheDir = RcppCache)
+      Rcpp::sourceCpp("R Inserts/Model.cpp", cacheDir = RcppCache)
     })
 
   } else {
@@ -1702,7 +1702,7 @@ print("projecting")
       # FIX: DO NOT USE A SHARED CACHE FOLDER
       # Windows locks the files if 13 cores hit it at once. 
       # Let each worker compile its own copy in isolation!
-      ###Rcpp::sourceCpp("R inserts/Model.cpp")
+      ###Rcpp::sourceCpp("R Inserts/Model.cpp")
       
       SimFolder <- paste0(General$RunFolder, "Sim_", Isim, "/")
       if (!dir.exists(SimFolder)) dir.create(SimFolder, recursive = TRUE)
