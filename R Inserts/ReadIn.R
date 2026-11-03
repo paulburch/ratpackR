@@ -612,6 +612,7 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
             SigmaLenAgeM[Isex,Iage,t] <- (CV1[Isex] + (MeanLenAgeM[Isex,Iage,t]-LenA1TV[t,Isex])/(LenA2TV[t,Isex]-LenA1TV[t,Isex])*(CV2[Isex]-CV1[Isex]))
           }
         } # Isex and Iage
+  if (!CVoption %in% c(0,1,2)) stop("#Growth:CVoption ",CVoption," is not implemented (use 0, 1 or 2)")   # FIX #43: options 3/4 left the SD of length-at-age at 0
   # Compute the transition matrices
    for (Isex in 1:Nsex)
     {

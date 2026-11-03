@@ -80,6 +80,8 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 39 | S#39 forecast.ss append / 2019 | new file; caps year = Year+YrOffset+1 | none changed | pass / pass | identical | safe |
 | 40 | S#40 Tier 4a B0(t) | B0[t] | none changed | pass (E1); P.cod Tier 4a before = after | identical | safe |
 | 41–42 | S#41 insurance hard-codes; S#42 predators | no change (unused; needs design) | – | – | – | for André |
+| 43 | S#43 CVoption 3/4 | stop() with message | none changed | pass (E1); CVoption 3 copy stops clearly | identical | safe |
+| 44 | S#44 hard-coded 50s / dead code | no change (refactor, not a fix) | – | – | – | left as is |
 
 ## Notes per step
 
@@ -562,5 +564,21 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   gives each sex the full R0. Insurance is off in every input and needs André's design
   (two-sex support is flagged by the author). Left as is.
 - **#42:** the predator module is unfinished (a deliberate `AAAA` stop). Left as is.
+
+### Step 43: suspected #43, `CVoption` 3/4 not implemented (`ReadIn.R:615`)
+- **Change:** `stop()` with a clear message when `#Growth:CVoption` is not 0, 1 or 2. Before,
+  options 3 and 4 silently left the SD of length-at-age at 0, giving a step-function
+  age–length key.
+- **Test:** a copy with `CVoption 3` (`Temp/CV3Inputs/`) now stops with
+  `#Growth:CVoption 3 is not implemented (use 0, 1 or 2)`. Silver.warehou E1, 96 s, exit 0, is
+  identical (it uses `CVoption 0`).
+- **Not changed:** `CVoption 0` extrapolating the CV beyond `LenA2` (behaviour to confirm
+  against SS).
+- **Verdict:** safe.
+
+### Step 44: suspected #44, hard-coded 50s and dead code, no change
+- The 50 forecast years and 50-slot TAC arrays are consistent with each other. Changing them
+  is a refactor, not a fix. `Utils.cpp`, `Project2`, `GetRecruit` and the Ricker branch are
+  unused. Left as is.
 
 
