@@ -71,6 +71,8 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 29 | S#29 HybridA all areas closed (**now confirmed**) | skip normalisation when no open area (no catch) | none changed | pass (E1); closed-area copy: old crashes, new runs (catch 0) | identical | safe |
 | 30 | S#30 MSY not 2/3 | explicit stop() with message | none changed | pass (E1); MSY 1 copy: clear error instead of "Fout not found" | identical | safe |
 | 31 | S#31 SPR_ref year-1 biology | use M and fecundity of Iyear (design to confirm) | none changed | pass / pass | identical (TrueRBC 2504.2 t both) | safe; matters with time-varying M |
+| 32 | S#32 `<-` on globals | `<<-` for General$Nsim and Stock$TheTACs | none changed | pass (E1); E0 before = after | identical | safe |
+| 33–34 | S#33 TAC slot 50; S#34 one-sim return | no change (harmless / intended) | – | – | – | left as is |
 
 ## Notes per step
 
@@ -459,3 +461,21 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   links, time-varying growth).
 - **Checks:** none changed.
 - **Verdict:** safe; it only matters with time-varying biology.
+
+### Step 32: suspected #32, `<-` on globals (`RatpackR.R:1761`, `Assessment.R:1816`)
+- **Change:** `General$Nsim <<- 1` and `Stock[[Istock]]$TheTACs[1] <<- 0`. Both made local
+  copies of the global objects.
+- **Tests:** `Estimation.test = 0` (the only mode that sets `TestCase` and so
+  `General$Nsim <- 1`) was run before and after the fix: outputs are identical. E1, 94 s,
+  exit 0, is identical too. The heatwave TAC closure (`Close.in.MHW`) is not used by the
+  current inputs.
+- **Checks:** none changed.
+- **Verdict:** safe. Results are the same; the global objects now hold what the code intended.
+
+### Steps 33–34: suspected #33 and #34, no change (by decision)
+- **#33** (TAC roll-over leaves slot 50 unchanged): slot 50 is beyond any projection length
+  in use, so it is harmless. Left as is.
+- **#34** (`DoRun` stops after 1 simulation unless `Estimation.test >= 90`): André's
+  intended development behaviour. Left as is; it is documented in `docs/cloud_setup.md`.
+
+

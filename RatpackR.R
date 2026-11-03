@@ -1758,7 +1758,7 @@ DoRun <- function(GeneralFile,RunNo)
 {
   # Read the general file
   General <<- Read.General.File(GeneralFile,RunNo)
-  if (TestCase==T) General$Nsim <- 1
+  if (TestCase==T) General$Nsim <<- 1   # FIX #32: was <-, which made a local copy of the global General
   write("",file=DebugFile)
 
   # General the seeds

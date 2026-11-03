@@ -1813,7 +1813,7 @@ Run_Tier1a <- function(Isim,Istock,Iarea,Year)
   if (Stock[[Istock]]$Ass$Has.insurance) Do.Insurance(Isim,Istock,Year)
 
   # Set the TAC to zero if there was a MHW
-  if (Stock[[Istock]]$Ass$Close.in.MHW == "Yes" & Stock[[Istock]]$Mcat.Index[Year+1]==1) Stock[[Istock]]$TheTACs[1] <- 0
+  if (Stock[[Istock]]$Ass$Close.in.MHW == "Yes" & Stock[[Istock]]$Mcat.Index[Year+1]==1) Stock[[Istock]]$TheTACs[1] <<- 0   # FIX #32: was <-, which made a local copy of the global Stock
   #print(Stock[[Istock]]$TheTACs)
   
   # Final output
