@@ -732,3 +732,19 @@ depletion is 0.49.
   BMSY, or drop the MSYL penalty for P.cod. Also consider whether Tier 4a should start from a
   depletion other than 1. The `nlminb` control misplacement (step 45) remains a minor
   separate issue; not kept.
+
+### Item 5 (done): regression test script `tests/run_all.sh`
+- **What it does:** runs the 20 bug checks, Silver.warehou E1 and E2, and P.cod Tier 4a (a
+  Tier 4a copy is made at run time). `--full` adds E99 and a 2-simulation `DoRunParallel`
+  run. Every output file is compared with `tests/reference/` (relative tolerance
+  `RATPACK_TOL`, default 1e-8). The script exits 1 on any difference or failed run.
+  `--update` re-generates the references. Details are in `tests/README.md`.
+- **References:** generated from the current `bugfix-experiments` code with
+  `--update --full` (8.5 min; 1.9 MB). In them, simulation 1 of the parallel 2-simulation
+  run is identical to the serial E99 run.
+- **Verification:**
+  - a normal run of the standard set straight after `--update`: **ALL TESTS PASSED** in
+    4 min 14 s (checks; E1 11 files, E2 10 files, Tier4a_Pcod 10 files, all identical);
+  - **negative test:** changing one number by 4e-5 in a copy of a reference, or one check
+    status, is detected (exit status 1).
+- **`compare_runs.R`:** now takes an optional tolerance argument and sets its exit status.
