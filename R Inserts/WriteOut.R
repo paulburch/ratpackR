@@ -460,7 +460,7 @@ WriteInsurance <- function(Isim,Istock,FileName)
       VecOutI <- c(VecOutI,sum(Stock[[Istock]]$RBC[Year]),Stock[[Istock]]$TACsStep[5,Year],Stock[[Istock]]$TACs[Year],sum(Stock[[Istock]]$CatchRetained[,,Year]))
       VecOutI <- c(VecOutI,Stock[[Istock]]$SSB[Iarea,Year],Stock[[Istock]]$Depletion[Iarea,Year]*100,sum(Stock[[Istock]]$BREF[,Year]))    
       VecOutI <- c(VecOutI,Stock[[Istock]]$Mcat.Index[Year], Stock[[Istock]]$Prob.Collapse.Ins[Year])
-      Totals <- rep(0,35)
+      Totals <- rep(0,5+3+3*11)   # FIX #24: 5 economics + 3 expected profits + 3 x 11 insurance types (was 35)
       for (Ifleet in 1:General$Ncat_fleet)
        {
         Catch <- Stock[[Istock]]$CatchRetained[Iarea,Ifleet,Year]

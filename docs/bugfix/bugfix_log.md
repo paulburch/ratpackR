@@ -64,6 +64,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 21 | #21 RNG streams restarted | set.seed(NextSeed) | B16 fixed; others unchanged | pass (E1, E99) | E1 identical; E99 draws change (RBC 59 369 → 29 659 t, 1 sim) | safe; breaks draw-for-draw reproducibility with old runs |
 | 22 | #22 LengthData seed row | width 7+Nsex*Nlen | B18 fixed; others unchanged | pass (E1) | identical; rbind warning gone | safe |
 | 23 | #23 file.remove showWarnings | argument dropped (calls already guarded) | none changed | pass (E1, E99) | identical; FALSE-file warnings 4 → 0 | safe |
+| 24 | #24 WriteInsurance totals | rep(0,41) | none changed | pass (E1) | identical; 48 warnings gone | safe |
 
 ## Notes per step
 
@@ -362,3 +363,11 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   step 22, E99 against step 21. The `cannot remove file 'FALSE'` warnings in E99 went from 4
   to 0.
 - **Verdict:** safe.
+
+### Step 24: bug #24, `WriteInsurance` totals length (`WriteOut.R:463`)
+- **Change:** `Totals <- rep(0,5+3+3*11)`, that is 41: 5 economic values, 3 expected profits
+  and 3 values for each of the 11 insurance types. It was 35.
+- **Checks:** none changed.
+- **Smoke test:** E1, 94 s, exit 0. Outputs are identical; the sums were already correct
+  through recycling. All 48 `longer object length` warnings per simulation are gone.
+- **Verdict:** safe. **That completes the Low items (#19–#24).**
