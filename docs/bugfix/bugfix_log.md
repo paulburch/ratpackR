@@ -78,6 +78,8 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 37 | S#37 CAA seeds | use CAA.seeds | none changed | pass (E1); CAA copy runs, length bins resampled independently | identical | safe |
 | 38 | S#38 env-index tautology | no change (intent unclear) | – | – | – | for André |
 | 39 | S#39 forecast.ss append / 2019 | new file; caps year = Year+YrOffset+1 | none changed | pass / pass | identical | safe |
+| 40 | S#40 Tier 4a B0(t) | B0[t] | none changed | pass (E1); P.cod Tier 4a before = after | identical | safe |
+| 41–42 | S#41 insurance hard-codes; S#42 predators | no change (unused; needs design) | – | – | – | for André |
 
 ## Notes per step
 
@@ -542,3 +544,23 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   step 36. No caps or allocations are defined, so the year doesn't affect the forecast here.
 - **Checks:** none changed.
 - **Verdict:** safe.
+
+### Step 40: suspected #40, Tier 4a `B0(t)` typo (`Assessment.R:1920`)
+- **Change:** `B0[t]`. `B0(t)` called `B0` as a function.
+- **Not changed:**
+  - Tier 4a's `dnorm(log(C), ...)` gives -Inf with zero catches. Adding a constant would
+    change the likelihood; a modelling decision for André.
+  - Tier 4b's use of true OM catch and its hard-coded `/0.48`: design.
+- **Tests:** P.cod Tier 4a (`Temp/Tier4aDefault/`) was run before and after the fix:
+  outputs are identical (the branch is dead with `IsDymB0 = 0`). Silver.warehou E1, 96 s,
+  exit 0, is identical.
+- **Checks:** none changed.
+- **Verdict:** safe.
+
+### Steps 41–42: suspected #41 (insurance) and #42 (predators), no change
+- **#41:** `Do.Insurance` hard-codes the SPR target at 0.41, and `Model.cpp` `Project()`
+  gives each sex the full R0. Insurance is off in every input and needs André's design
+  (two-sex support is flagged by the author). Left as is.
+- **#42:** the predator module is unfinished (a deliberate `AAAA` stop). Left as is.
+
+

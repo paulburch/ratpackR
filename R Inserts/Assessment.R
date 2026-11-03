@@ -1917,7 +1917,7 @@ f2 <- function(parms,data) {
     B[t+1] <- B[t+1]*exp(Rec_dev[t]*SigmaR-SigmaR*SigmaR/2.0);
     if (IsDymB0==1)
     {
-      B0[t+1] <- B0(t) + r*B0[t]*(1-(B0[t]/k)^z);
+      B0[t+1] <- B0[t] + r*B0[t]*(1-(B0[t]/k)^z);   # FIX #40: was B0(t), a function call
       B0[t+1] <- B0[t+1]*exp(Rec_dev[t]*SigmaR-SigmaR*SigmaR/2.0);
     }
     else
