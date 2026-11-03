@@ -210,7 +210,7 @@ HybridA <- function(Istock,Year,Cat.H,Initial.Eqn=F,Use.Profit.constraint="No")
      # AEP - need to update for closed areas here
      Bvul <- rep(0,Narea)
      for (Iarea in 1:Narea) Bvul[Iarea] <- sum(N.H[Iarea,,]*Stock[[Istock]]$UseFleet[Iarea,Ifleet,Year]*SelRetWght.H[Ifleet,,])*Stock[[Istock]]$ClosedAreas[Iarea,Year]
-     Bvul <- Bvul/sum(Bvul)
+     if (sum(Bvul) > 0) Bvul <- Bvul/sum(Bvul)   # FIX #29: all areas closed to this fleet -> no catch (was 0/0 = NaN)
      Cat.H2[,Ifleet] <- Cat.H[Ifleet]*Bvul
    }
  

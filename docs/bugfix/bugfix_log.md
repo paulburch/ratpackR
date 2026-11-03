@@ -68,6 +68,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 25 | S#25 + S#26 implementation-error block | per-stock TAC.management test; TACsStep[6] = implemented TAC | none changed | pass / pass | identical; with impl. error on, Target_catch NA → 3048.7 t | safe |
 | 27 | S#27 area linear indexing (equilibrium block) | [Iarea,...] indexing | none changed | pass (E1); equilibrium-catch copy runs, old = new | identical (1 area) | safe; Assessment.R parts left (design) |
 | 28 | S#28 Stock[[1]]$Nhist | Stock[[Istock]]$Nhist | none changed | pass (E1) | identical | safe |
+| 29 | S#29 HybridA all areas closed (**now confirmed**) | skip normalisation when no open area (no catch) | none changed | pass (E1); closed-area copy: old crashes, new runs (catch 0) | identical | safe |
 
 ## Notes per step
 
@@ -418,3 +419,17 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Checks:** none changed.
 - **Smoke test:** E1, 90 s, exit 0. Outputs are identical (single stock).
 - **Verdict:** safe; it only matters for multi-stock runs where stocks have different `Nhist`.
+
+### Step 29: suspected #29, `HybridA` NaN when every area is closed (`RatpackR.R:213`), now confirmed
+- **End-to-end test:** a copy of Silver.warehou with its only area closed in 2026
+  (`#Spatial:N_Closed_areas 1`, `1 2026 2026`; `Temp/ClosedInputs/`):
+  - **old code:** the run stops with `Error in if (Cat.H2[Iarea, Ifleet] > 0) : missing value
+    where TRUE/FALSE needed`, from `Bvul/sum(Bvul)` = 0/0. **This upgrades #29 to confirmed;
+    closed areas crash the run.**
+  - **fixed code:** the run completes (E1). The 2026 TAC is still set (6054 t), but the catch
+    is about 0 (5.7e-16 t), because no area is open.
+- **Change:** `if (sum(Bvul) > 0) Bvul <- Bvul/sum(Bvul)`. A fleet with every area closed
+  takes no catch.
+- **Checks:** none changed.
+- **Smoke test:** E1, 89 s, exit 0. Outputs are identical.
+- **Verdict:** safe; closed-area scenarios now run.
