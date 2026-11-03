@@ -55,6 +55,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 12 | #12 Tier 4b CPUE limit | compare with Cpue.limit | none changed (B06 is a stand-alone demo; rule verified separately) | pass (E1 only) | identical (Tier 4b unused) | safe; not run end-to-end |
 | 13 | #13 DataGen discard ages | Stock[[Istock]]...[Iarea,...] | none changed (B07 is a demo) | pass (E1 only) | identical; with discard ages on: old code crashes, new code runs | safe, verified end-to-end |
 | 14 | #14 Tier 5 / no TAC management crash | TAC array set to 0 (F from F.fix) | none changed | pass / pass | identical; Tier 5 run: old crashes, new completes | safe, verified end-to-end |
+| 15 | #15 CatchType 3 index | F.Selex.Inp[,Ifleet,] (zero F fill still open) | none changed (B12 is a demo) | pass (E1 only) | identical | crash fixed; CatchType 3 still needs data |
 
 ## Notes per step
 
@@ -236,3 +237,13 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke tests:** E1 91 s and E2 95 s, both exit 0. Outputs are identical; E2 was compared
   with step 11, the last E2 run.
 - **Verdict:** safe. Tier 5 option 1 now runs.
+
+### Step 15: bug #15, `ReviewFsolver` indexes the 3-D `F.Selex.Inp` with 2 subscripts (`RatpackR.R:1731`)
+- **Change:** `sum(F.Selex.Inp[,Ifleet,])`. The fixed expression gives per-fleet totals on a
+  1 × 4 × 46 test array (0, 4.6, 0, 0).
+- **Not fixed:** for `CatchType` 3, `F.Selex.Inp` is still all zeros (`ReadIn.R:1085`; the fill
+  from `OM.obj$Fleet.F.data` is commented out "AEP FIX"). That needs André's data source.
+- **Checks:** none changed. B12 demonstrates the indexing error in isolation.
+- **Smoke test:** E1 only, 90 s, exit 0. Outputs are identical; multispecies and
+  `CatchType` 3 are not used.
+- **Verdict:** safe, but only the crash is fixed; `CatchType` 3 is still unusable.

@@ -1731,7 +1731,7 @@ ReviewFsolver <- function()
    for (Ifleet in 1:General$Ncat_fleet)  
     {
      if (Stock[[Istock]]$CatchType %in% c(1,2)) Species.Fleet.Catch[Istock,Ifleet] <- sum(Stock[[Istock]]$CatchInp[,Ifleet])
-     if (Stock[[Istock]]$CatchType %in% c(3)) Species.Fleet.Catch[Istock,Ifleet] <- sum(Stock[[Istock]]$F.Selex.Inp[,Ifleet],)
+     if (Stock[[Istock]]$CatchType %in% c(3)) Species.Fleet.Catch[Istock,Ifleet] <- sum(Stock[[Istock]]$F.Selex.Inp[,Ifleet,])
     }
   print(Species.Fleet.Catch)
   
