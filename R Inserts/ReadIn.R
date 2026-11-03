@@ -1657,23 +1657,23 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
   if (length(Index) > 0)
    for (Ifleet in 1:General$Nfleet)
     {
-     Index2 <- Index+Ifleet
-     Nbreak <- as.numeric(AllInput[Index+1,1])
-     Yr1 <- as.numeric(AllInput[Index+1,2])-StockDetails$YrOffset
-     YrN <- as.numeric(AllInput[Index+1,1+(Nbreak-1)*2+1])-StockDetails$YrOffset
-     if (YrN>General$Nproj+1) YrN <- Nhist+General$Nproj+1
-     for (Iyr in 1:Yr1)  Catch.Bias[,Iyr,Ifleet] <- as.numeric(AllInput[Index+1,3])
-     for (Iyr in YrN:(Nhist+General$Nproj+1))  Catch.Bias[,Iyr,Ifleet] <- as.numeric(AllInput[Index+1,1+Nbreak*2])
+     Index2 <- Index+Ifleet   # FIX #11: each fleet reads its own row (was Index+1)
+     Nbreak <- as.numeric(AllInput[Index2,1])
+     Yr1 <- as.numeric(AllInput[Index2,2])-StockDetails$YrOffset
+     YrN <- as.numeric(AllInput[Index2,1+(Nbreak-1)*2+1])-StockDetails$YrOffset
+     if (YrN>Nhist+General$Nproj+1) YrN <- Nhist+General$Nproj+1   # FIX #11b: compare with the last model year
+     for (Iyr in 1:Yr1)  Catch.Bias[,Iyr,Ifleet] <- as.numeric(AllInput[Index2,3])
+     for (Iyr in YrN:(Nhist+General$Nproj+1))  Catch.Bias[,Iyr,Ifleet] <- as.numeric(AllInput[Index2,1+Nbreak*2])
      if (Nbreak >= 2)
       for (Ibreak in 1:(Nbreak-1))
        {
-        Yr1 <- as.numeric(AllInput[Index+1,1+(Ibreak-1)*2+1])-StockDetails$YrOffset
+        Yr1 <- as.numeric(AllInput[Index2,1+(Ibreak-1)*2+1])-StockDetails$YrOffset
         if (Yr1 > Nhist+General$Nproj+1) Yr1 <- Nhist+General$Nproj+1
-        V1 <- as.numeric(AllInput[Index+1,1+(Ibreak-1)*2+2])
-        Yr2 <- as.numeric(AllInput[Index+1,1+Ibreak*2+1])-StockDetails$YrOffset
+        V1 <- as.numeric(AllInput[Index2,1+(Ibreak-1)*2+2])
+        Yr2 <- as.numeric(AllInput[Index2,1+Ibreak*2+1])-StockDetails$YrOffset
         if (Yr1==Yr2) { print("Error in catch bias"); stop() }
         if (Yr2 > Nhist+General$Nproj+1) Yr2 <- Nhist+General$Nproj+1
-        V2 <- as.numeric(AllInput[Index+1,1+Ibreak*2+2])
+        V2 <- as.numeric(AllInput[Index2,1+Ibreak*2+2])
         for (Iyr in Yr1:Yr2) Catch.Bias[,Iyr,Ifleet] <- V1 +(V2-V1)*(Iyr-Yr1)/(Yr2-Yr1)  
        }  
     }

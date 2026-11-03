@@ -51,6 +51,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 8 | #8 movement age a-1 vs a | equilibrium code uses Move[,,Iage] like the projection (to confirm) | B10b fixed; others unchanged | pass / pass | identical (1 area) | safe; convention to confirm |
 | 9 | #9 steepness bias | h_init = h × bias (negative = fixed) | B05 fixed; others unchanged | pass / pass | identical (Silver uses fixed h) | safe; watch h bounds >1 |
 | 10 | #10 Early-R0 block-end name | single name .end.yrs with default | B04 fixed; others unchanged | pass / pass | identical | safe |
+| 11 | #11 catch-bias rows | per-fleet row; fill to last model year | B03a, B03b fixed; others unchanged | pass / pass | identical (all biases 1) | safe |
 
 ## Notes per step
 
@@ -178,4 +179,15 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   no early-R0 multiplier.
 - **Note:** Morwong and P.cod use `#Early_R0Mult`, but their block starts at 0 and they have
   no equilibrium catch, so they follow the same code path as before.
+- **Verdict:** safe.
+
+### Step 11: bug #11, catch-bias rows (`ReadIn.R:1655-1679`)
+- **Change:** each fleet reads its own row, `AllInput[Index2,...]` (9 references in the
+  block). The last segment now fills to the end: `YrN` is compared with `Nhist+Nproj+1`.
+- **Checks:** B03a and B03b changed to NOT REPRODUCED. Fleet 2 now gets its own 0.5, and
+  2010 gets 1.2. No other check changed.
+- **Input check:** every `.OM` file in the repo has exactly one bias row per fleet
+  (catch and survey fleets; 18 files), so the per-fleet read is valid everywhere. All values
+  are currently 1.
+- **Smoke tests:** E1 89 s and E2 92 s, both exit 0. Outputs are identical.
 - **Verdict:** safe.
