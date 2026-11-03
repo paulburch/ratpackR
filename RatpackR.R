@@ -834,7 +834,7 @@ SPR_ref <- function(Istock,Fmult=0,AveF,Iyear)
      {
        Ntemp <- Neqn[Iarea,Isex,Iage-1] * exp(-Z[Iarea,Isex,Iage-1])
        for (Jarea in 1:Narea)
-         Neqn[Jarea,Isex,Iage] <- Neqn[Jarea,Isex,Iage] + Stock[[Istock]]$Move[Iarea,Jarea,Iage-1]*Ntemp   # FIX #7a: add to the destination area
+         Neqn[Jarea,Isex,Iage] <- Neqn[Jarea,Isex,Iage] + Stock[[Istock]]$Move[Iarea,Jarea,Iage]*Ntemp   # FIX #7a: add to the destination area; FIX #8: Move at age Iage, as in Project.One.Ahead
      } # IAge x Iarea
    
    # Now for the plus-group
@@ -1003,7 +1003,7 @@ Do.Project <- function(Isim)
          {
           Ntemp <- Ninit[Iarea,Isex,Iage-1] * exp(-Stock[[Istock]]$M[Isex,Iage-1,1])
           for (Jarea in 1:Narea)
-           Ninit[Jarea,Isex,Iage] <- Ninit[Jarea,Isex,Iage] + Stock[[Istock]]$Move[Iarea,Jarea,Iage-1]*Ntemp
+           Ninit[Jarea,Isex,Iage] <- Ninit[Jarea,Isex,Iage] + Stock[[Istock]]$Move[Iarea,Jarea,Iage]*Ntemp   # FIX #8: Move at age Iage, as in Project.One.Ahead
         } # IAge x Iarea
       
       # Now for the plus-group
@@ -1112,7 +1112,7 @@ Do.Project <- function(Isim)
           {
            Ntemp <- NtempZ[Iarea,Isex,Iage-1]
            for (Jarea in 1:Narea)
-            Stock[[Istock]]$N[Jarea,Isex,Iage,2] <<- Stock[[Istock]]$N[Jarea,Isex,Iage,2] + Stock[[Istock]]$Move[Iarea,Jarea,Iage-1]*Ntemp
+            Stock[[Istock]]$N[Jarea,Isex,Iage,2] <<- Stock[[Istock]]$N[Jarea,Isex,Iage,2] + Stock[[Istock]]$Move[Iarea,Jarea,Iage]*Ntemp   # FIX #8
           } # Isx, Iage x Iarea
          
        # project forward (including a plus-group)

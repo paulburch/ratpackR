@@ -48,6 +48,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 5 | #5 PGMSY 0/0 | zero-catch linked fleet treated as unlinked | B14 fixed; others unchanged | pass / pass | identical (PGMSY off) | safe; rule to confirm |
 | 6 | #6 TAC.mat byrow | no byrow, only own areas | none changed (B08 is a stand-alone replica; new expression verified separately) | pass / pass | identical (NassArea 1) | safe |
 | 7 | #7 SPR_ref multi-area | destination area, transposed plus group, catch over all areas | B10a, B10c fixed; others unchanged | pass / pass | identical (1 area) | safe |
+| 8 | #8 movement age a-1 vs a | equilibrium code uses Move[,,Iage] like the projection (to confirm) | B10b fixed; others unchanged | pass / pass | identical (1 area) | safe; convention to confirm |
 
 ## Notes per step
 
@@ -142,3 +143,14 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke tests:** E1 90 s and E2 94 s, both exit 0. Outputs are identical (`Narea = 1`,
   `Move = 1`).
 - **Verdict:** safe for single-area runs; correct for multi-area runs in the synthetic test.
+
+### Step 8: bug #8, movement age index (`RatpackR.R:837, 1006, 1115`)
+- **Change:** `Get.Initial`, the equilibrium-catch loop and `SPR_ref` now use
+  `Move[Iarea,Jarea,Iage]`, the age fish have just reached, as `Project.One.Ahead` does.
+  **This is a modelling choice André should confirm.** The alternative is to change
+  `Project.One.Ahead` to `Iage-1`.
+- **Checks:** B10b changed to NOT REPRODUCED. `Get.Initial`, `SPR_ref` and the projection rule
+  now agree exactly (2.844 fish per recruit in area 2; maximum difference 0.000).
+- **Smoke tests:** E1 89 s and E2 93 s, both exit 0. Outputs are identical (single area).
+- **Verdict:** safe for single-area runs; consistent across the three routines for multi-area
+  runs.
