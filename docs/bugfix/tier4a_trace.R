@@ -1,0 +1,18 @@
+# Trace one Tier 4a assessment for P.cod and report the fit
+Path <- "/home/user/ratpackR/"; setwd(Path); args <- c("1","1","Temp/Tier4aDefault/","P.cod")
+src <- readLines("RunStreams/RunSmokeTest.R"); src <- sub("^args <- commandArgs.*", "args <- c('1','1','Temp/Tier4aDefault/','P.cod')", src)
+cut <- grep("^RunNo <- ", src); eval(parse(text = src[1:(cut-1)]))
+trace("Run_Tier4a", exit = quote(assign("T4", list(Report = Report, fit = fit, rep2 = rep2, data = data, Year = Year, Istock = Istock), envir = .GlobalEnv)), print = FALSE)
+DoRun(GeneralFile = "General_P.cod.OM", RunNo = "T4aTrace")
+R <- T4$Report; n <- T4$Year
+cat("\n=== Tier 4a fit, assessment year", n + Stock[[1]]$YrOffset, "===\n")
+cat("convergence:", T4$fit$convergence, T4$fit$message, " objective:", T4$fit$objective, "\n")
+cat("r =", R$r, " k =", R$k, " z =", R$z, "\n")
+cat("estimated depletion (B/k) end of data year:", R$Blast/R$k, "  alpha/beta:", T4$data$alpha, T4$data$beta, "\n")
+truth <- sum(Stock[[1]]$SSB[, n + 1]) / sum(Stock[[1]]$SSB0)
+cat("true SSB depletion same year:", truth, "\n")
+cat("first ABC1 values:", head(R$ABC1, 3), "\n")
+cat("estimated depletion series (last 10 yrs):", round(R$Depl[(n - 9):(n + 1)], 3), "\n")
+cat("true depletion series (last 10 yrs):    ", round(colSums(Stock[[1]]$SSB[, (n - 9):(n + 1), drop = FALSE]) / sum(Stock[[1]]$SSB0), 3), "\n")
+cat("index fleets used:", T4$data$Ncpue, " years with catch 0:", sum(T4$data$C <= 0), "\n")
+print(T4$rep2[rownames(T4$rep2) %in% c("r","k","MSY","MSYLOut"), ])

@@ -82,6 +82,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 41–42 | S#41 insurance hard-codes; S#42 predators | no change (unused; needs design) | – | – | – | for André |
 | 43 | S#43 CVoption 3/4 | stop() with message | none changed | pass (E1); CVoption 3 copy stops clearly | identical | safe |
 | 44 | S#44 hard-coded 50s / dead code | no change (refactor, not a fix) | – | – | – | left as is |
+| 45 | S#45 Tier 4a RBC 0 for P.cod | investigated; nlminb-limits fix tested, not kept | – | P.cod trace: fit not converged, depletion 0.11 vs true 0.49 | – | input issue (r prior SD 0.0001, CVMSYL 0.002); for André |
 
 ## Notes per step
 
@@ -581,4 +582,51 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   is a refactor, not a fix. `Utils.cpp`, `Project2`, `GetRecruit` and the Ricker branch are
   unused. Left as is.
 
+### Step 45: suspected #45, Tier 4a gives RBC = 0 for P.cod (investigated; no code change kept)
+- **Diagnosis** (`docs/bugfix/tier4a_trace.R`, which traces one Tier 4a assessment, P.cod,
+  2024; P.cod's own settings, `EstR Yes / EstZ No`):
+  - `nlminb` did **not converge** (`function evaluation limit reached without convergence`).
+  - r = 0.150, K = 1.71e6. Estimated depletion at the end of the data is **0.11**, against a
+    **true SSB depletion of 0.49**. The estimated series stays at 0.10–0.19 for the last
+    10 years while the truth is 0.44–0.83.
+  - The HCR therefore sits below `alpha` (0.2): ABC1 is negative and is set to 0, so
+    **RBC = 0**.
+- **Cause: the P.cod Tier 4a inputs.**
+  - `#Tier_4a:PriorMeanR 0.15` with `PriorSDr 0.0001` effectively fixes r at 0.15.
+  - `#Tier_4a:CVMSYL 0.002` forces mean 1985–1995 biomass to equal BMSY (0.4 K) almost exactly.
+  - With r pinned, the model can only match the catches and CPUE by putting the stock near
+    10% depletion.
+  - This is a configuration issue for André or Paul, not a code error.
+- **Related code bug (real, minor):** `Run_Tier4a` passes
+  `control=list(eval.max=10000, iter.max=1000, rel.tol=1e-15)` to `MakeADFun`, but the
+  `nlminb` calls (lines 2140, 2150) run with their defaults (200 evaluations).
+  - **Tested:** I passed the limits to `nlminb`. The fit still fails (iteration limit
+    1000), depletion moves to 0.087, the RBC stays 0, and the standard errors become NaN.
+  - **Not kept:** it changes Tier 4a numbers without fixing the outcome. It's recorded here
+    for André.
+- **Verdict:** RBC = 0 is explained by the inputs. The suggestion is to review P.cod's Tier 4a
+  priors (r and CVMSYL) before using Tier 4a results, and to decide separately on the
+  `nlminb` control fix.
 
+## Summary after the Low and suspected items (steps 19–45)
+- **Low items #19–#24:** all fixed and tested. None broke anything; outputs were identical,
+  except for the intended changes:
+  - #19: per-area discards 0 → 6792 t;
+  - #21: new random draws in stochastic runs, so results are not reproducible draw-for-draw
+    against older runs;
+  - #22–#24: warnings removed.
+- **Suspected items fixed** (#25–#32, #35–#37, #39, #40, #43): all tested, none broke anything.
+  - #29 was **upgraded to confirmed**: a closed area crashed the run.
+  - #36 shifted E2 estimates by at most 1.9e-5 relative, with an identical TAC.
+- **Left unchanged by decision:**
+  - harmless or intended: #33, #34, #44;
+  - need André's input: #38, #41, #42;
+  - partially fixed, multi-area design parts left: #27, #35.
+- **#45 investigated:** Tier 4a's RBC = 0 for P.cod comes from the input priors (r effectively
+  fixed, very tight CVMSYL), not from a code error. The related `nlminb`-limits bug was
+  tested and not kept.
+- **New input files created for tests** (all under `Temp/`, git-ignored):
+  - `DiscAgeInputs`, `Tier5Inputs`, `Tier4aInputs`, `Tier4aDefault`, `ImplErrInputs`;
+  - `EqCatchInputs`, `ClosedInputs`, `MSY1Inputs`, `CAAInputs`, `CV3Inputs`.
+
+  Each is a copy of Silver.warehou (or P.cod) with one switch changed, as described in its step.
