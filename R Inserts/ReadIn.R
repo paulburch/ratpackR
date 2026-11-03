@@ -1242,7 +1242,7 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
    } # IassArea
   
   # Generate the devs for discard discard
-  set.seed(Seed); NextSeed <- floor(runif(1,1,1000000))
+  set.seed(NextSeed); NextSeed <- floor(runif(1,1,1000000))   # FIX #21: was set.seed(Seed), which restarted the seed chain
   Discard.devs <- array(-1,dim=c(NassArea,Nhist+General$Nproj+1,General$Nfleet))
   for (IassArea in 1:NassArea)
    for (Year in 1:(Nhist+General$Nproj+1))

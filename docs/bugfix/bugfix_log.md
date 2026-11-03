@@ -61,6 +61,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 18 | #18 CPUE double selectivity | drop SelexAge (already in SelRetWghtAge) | none changed | pass / pass | identical (0/1 selectivity in all inputs) | safe |
 | 19 | #19 CatchDiscardl typo | CatchDiscard; $Full → $FullF | none changed | pass (E1) | ProjectFleetArea discards 0 → 6792 t (= ProjectAll) | safe |
 | 20 | #20 rec-dev bias ramp | calendar years; 1 → 0 over the ramp | none changed (B13 is a demo) | pass / pass | identical | safe |
+| 21 | #21 RNG streams restarted | set.seed(NextSeed) | B16 fixed; others unchanged | pass (E1, E99) | E1 identical; E99 draws change (RBC 59 369 → 29 659 t, 1 sim) | safe; breaks draw-for-draw reproducibility with old runs |
 
 ## Notes per step
 
@@ -328,3 +329,18 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   steps; the only E2 difference from step 18 is the step-19 discard column. The branch only
   affects starting `.par` rec devs, and Silver.warehou never reaches it.
 - **Verdict:** safe.
+
+### Step 21: bug #21, random streams restarted (`ReadIn.R:1245`)
+- **Change:** the discard deviations use `set.seed(NextSeed)` instead of `set.seed(Seed)`.
+  The seed chain no longer restarts, so later streams no longer repeat earlier ones.
+- **Checks:** B16 changed to NOT REPRODUCED. The age-sample seeds are no longer the uniforms
+  that decide catastrophic M. No other check changed.
+- **Smoke tests:** E1 97 s and E99 104 s, both exit 0. E1 is identical (deterministic data).
+  In E99 (stochastic data) the 2026 RBC changed from 59 369 t (step 3) to 29 659 t, and the
+  final TAC from 43 671 to 21 817 t. That is expected: the simulated discard, length, age
+  and catch data now use different random numbers. With one simulation the RBC is very
+  noisy, so the size of the change says nothing about bias.
+- **Consequence:** stochastic runs after this fix will not reproduce earlier runs
+  draw-for-draw, even with the same seeds. Distributions over many simulations should be
+  equivalent.
+- **Verdict:** safe; only the random draws change, by design.
