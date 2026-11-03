@@ -630,3 +630,24 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   - `EqCatchInputs`, `ClosedInputs`, `MSY1Inputs`, `CAAInputs`, `CV3Inputs`.
 
   Each is a copy of Silver.warehou (or P.cod) with one switch changed, as described in its step.
+
+## Final regression: all fixes together vs the original baseline
+`bash docs/bugfix/run_fix_tests.sh final "1 2 99"`, with `PREV=baseline`. All three runs
+completed (E1 96 s, E2 98 s, E99 102 s).
+- **Checks:** 15 checks went from CONFIRMED to NOT REPRODUCED: B01, B02, B02b, B03a, B03b, B04,
+  B05, B09, B10a–c, B14, B16, B18. The stand-alone demos (B06, B07, B08, B11, B12, B13, B17,
+  B20) still say CONFIRMED by design. B17 is the parallel-code issue (#17), which is still open.
+- **E1 and E2 differences** are explained by the intended fixes:
+  - historical rows: Cost and Profit NA → numbers (#1), and per-area discards (#19);
+  - 2026–27 rows: the 0.9 buffer (#2). The final 2026 TAC is 6726.6 → 6053.9 t (E1) and
+    2147.5 → 1932.8 t (E2). **RBCs are identical** (8230.1 and 2627.5 t).
+  - E2 also has the #36 shifts (estimates ≤1.9e-5 relative).
+- **E99** also differs through the new random streams (#21): the 2026 RBC is 59 369 → 29 659 t
+  (one simulation), and the EM folder is 1.7 MB instead of 11 MB (#3).
+- **Conclusion:** applied together, the 41 fixes don't break any part of the single-stock
+  Tier 1 path or the alternative paths tested:
+  - Tier 4a (P.cod) and Tier 5;
+  - discard ages and CAA;
+  - equilibrium catch, closed areas and implementation error.
+
+  Multi-stock and multi-area behaviour was verified only with synthetic checks.
