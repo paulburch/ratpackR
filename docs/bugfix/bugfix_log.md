@@ -66,6 +66,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 23 | #23 file.remove showWarnings | argument dropped (calls already guarded) | none changed | pass (E1, E99) | identical; FALSE-file warnings 4 → 0 | safe |
 | 24 | #24 WriteInsurance totals | rep(0,41) | none changed | pass (E1) | identical; 48 warnings gone | safe |
 | 25 | S#25 + S#26 implementation-error block | per-stock TAC.management test; TACsStep[6] = implemented TAC | none changed | pass / pass | identical; with impl. error on, Target_catch NA → 3048.7 t | safe |
+| 27 | S#27 area linear indexing (equilibrium block) | [Iarea,...] indexing | none changed | pass (E1); equilibrium-catch copy runs, old = new | identical (1 area) | safe; Assessment.R parts left (design) |
 
 ## Notes per step
 
@@ -392,3 +393,21 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke tests:** E1 94 s and E2 98 s, both exit 0. Outputs are identical (implementation
   error off).
 - **Verdict:** safe. #26 is a diagnostic-only fix; #25 matters only for multi-stock runs.
+
+### Step 27: suspected #27, linear indexing of area matrices (`RatpackR.R:1150-1160`)
+- **Change:** in the equilibrium-catch block, `EarlyDevs[1:MaxAge]` becomes
+  `EarlyDevs[Iarea,1:MaxAge]`, `EarlyDevs[1]` becomes `EarlyDevs[Iarea,1]`, and `R0[1]`
+  becomes `R0[Iarea,1]`; 2 occurrences each.
+- **Not changed:** `Assessment.R:766,1250` (`Finitial[Ifleet]`) and `1238`
+  (`Rec_devs[Iyr]`). The EM is single-area, so combining biological areas into the EM's
+  starting values is a design decision for André.
+- **End-to-end test:** no input has a non-zero equilibrium catch, so this block never runs
+  today. I made a copy of Silver.warehou with equilibrium catch 100 t on fleets 1–2 and an
+  initial F of 0.05 (`Temp/EqCatchInputs/`). The block ran in old and new code
+  ("Doing initial catch" × 11), both completed, and the outputs are **identical** (single area:
+  `[1,k]` and `[k]` are the same element). The initial stock starts at 64% depletion instead
+  of 100%, so the block is active.
+- **Checks:** none changed.
+- **Smoke test:** E1, 93 s, exit 0. Outputs are identical.
+- **Verdict:** safe. It only changes results with several areas, which can't be run
+  end to end.

@@ -1147,17 +1147,17 @@ Do.Project <- function(Isim)
        Recr <- 4.0 *Stock[[Istock]]$R00[Iarea]*Stock[[Istock]]$Steep*Depl / ( (1-Stock[[Istock]]$Steep) + (5*Stock[[Istock]]$Steep-1)*Depl)
        # Adjust by early devs
        if (Stock[[Istock]]$Early.R0.mult.end.yrs[1]!=0) 
-        for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1] <<- Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1]*exp(Stock[[Istock]]$Early.R0.mult+Stock[[Istock]]$EarlyDevs[1:MaxAge])
+        for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1] <<- Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1]*exp(Stock[[Istock]]$Early.R0.mult+Stock[[Istock]]$EarlyDevs[Iarea,1:MaxAge])
        if (Stock[[Istock]]$Early.R0.mult.end.yrs[1]==0) 
-         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1] <<- Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1]*exp(Stock[[Istock]]$EarlyDevs[1:MaxAge])
+         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1] <<- Stock[[Istock]]$N[Iarea,Isex,1:MaxAge,1]*exp(Stock[[Istock]]$EarlyDevs[Iarea,1:MaxAge])
        if (Stock[[Istock]]$Use_Steep_in_equ==0)
         {
-         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1,1] <<- Stock[[Istock]]$R0[1]*exp(Stock[[Istock]]$EarlyDevs[1])/Nsex
-         Stock[[Istock]]$Exp.Recr[Iarea,1] <<- Stock[[Istock]]$R0[1]
+         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1,1] <<- Stock[[Istock]]$R0[Iarea,1]*exp(Stock[[Istock]]$EarlyDevs[Iarea,1])/Nsex
+         Stock[[Istock]]$Exp.Recr[Iarea,1] <<- Stock[[Istock]]$R0[Iarea,1]
         }
        if (Stock[[Istock]]$Use_Steep_in_equ==1)
         {
-         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1,1] <<- Recr/Nsex*exp(Stock[[Istock]]$EarlyDevs[1])
+         for (Isex in 1:Nsex) Stock[[Istock]]$N[Iarea,Isex,1,1] <<- Recr/Nsex*exp(Stock[[Istock]]$EarlyDevs[Iarea,1])
          Stock[[Istock]]$Exp.Recr[Iarea,1] <<- Recr
         }
        # SSB does not include age=0
