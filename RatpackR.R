@@ -1,15 +1,15 @@
  
-source("R inserts/Readin.R")
-source("R inserts/WriteOut.R")
-source("R inserts/Assessment.R")
-source("R inserts/DataGen.R")
+source("R Inserts/ReadIn.R")
+source("R Inserts/WriteOut.R")
+source("R Inserts/Assessment.R")
+source("R Inserts/DataGen.R")
 Current_folder <- getwd()
 
 DebugFile <- NULL
 
 # Compile the model code
 print("compiling")
-sourceCpp("R inserts/Model.cpp")
+sourceCpp("R Inserts/Model.cpp")
 print("compiled")
 
 

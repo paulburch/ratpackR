@@ -1,11 +1,12 @@
 rm(list=ls())
 
-Path <- "C:/Research/NewRat/"
+Repo <- sub("/*$", "/", Sys.getenv("RATPACK_ROOT", unset = getwd()))          # this repository (was C:/Research/NewRat/NewRat_spat/)
+Path <- sub("/*$", "/", Sys.getenv("RATPACK_BASE", unset = dirname(Repo)))  # folder holding "Base * files/" (was C:/Research/NewRat/)
 setwd(Path)
 
 library(r4ss)
 library(readxl)
-source(paste0(Path,"NewRat_spat/R inserts/SaveFiles.R"))
+source(paste0(Repo,"R Inserts/SaveFiles.R"))
 
 #
 # =====================================================================================================================
@@ -1728,7 +1729,7 @@ RunType <- "Test"
 # YearAdjust - this is designed to handle cases where there are not data for the last year with catches
 # AgeAdjust - Switch off age data
 
-ExtraCat <- read.csv("newrat_spat/ExtraCatches.Csv",head=F)
+ExtraCat <- read.csv(paste0(Repo,"ExtraCatches.csv"),head=F)
 ncol.Cat <- length(ExtraCat[1,])
 
 #for (Ispec in c("A1","A2","B1",paste0("C",c(1:10)),paste0("D",c(1:9)) ) )
@@ -1803,13 +1804,13 @@ for (Ispec in paste0("C",c(6,8,9,10,11)))
   if (Ispec=="D30")  { Analsis.Type <- 4; SS_folder <- "Red_Emperor_Pilbara_2A_nodevs_CVfix"; Species <- "Red_Emperor_Pilbara_2A_nodevs_CVfix"; Project.Type <- 1 }
 
   
-  if (Analsis.Type==1) BasePath <- paste0(Path,"Newrat_spat/Inputs Buffer/")
+  if (Analsis.Type==1) BasePath <- paste0(Repo,"Inputs Buffer/")
   if (Analsis.Type==1) AssignmentPath <- paste0(Path,"Base Buffer files/")
-  if (Analsis.Type==2) BasePath <- paste0(Path,"Newrat_spat/Inputs OMF52/")
+  if (Analsis.Type==2) BasePath <- paste0(Repo,"Inputs OMF52/")
   if (Analsis.Type==2) AssignmentPath <- paste0(Path,"Base OMF5 files/")
-  if (Analsis.Type==3) BasePath <- paste0(Path,"Newrat_spat/Inputs CSIRO/")
+  if (Analsis.Type==3) BasePath <- paste0(Repo,"Inputs CSIRO/")
   if (Analsis.Type==3) AssignmentPath <- paste0(Path,"Base CSIRO files/")
-  if (Analsis.Type==4) BasePath <- paste0(Path,"Newrat_spat/Inputs Other/")
+  if (Analsis.Type==4) BasePath <- paste0(Repo,"Inputs Other/")
   if (Analsis.Type==4) AssignmentPath <- paste0(Path,"Base Other files/")
   
   Index <- which(ExtraCat[,1]==Ispec)
