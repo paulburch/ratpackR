@@ -1841,7 +1841,7 @@ Run_Tier1a <- function(Isim,Istock,Iarea,Year)
   if (file.exists("ss3.b02")) file.remove("ss3.b02",showWarnings=F)
   if (file.exists("ss3.b03")) file.remove("ss3.b03",showWarnings=F)
 
-  if (!Estimation.test %in% c(99) & (Stock[[Istock]]$Ass$Clean.up=="Default" || Stock[[Istock]]$Ass$Clean.up=="Full"))
+  if (Estimation.test %in% c(99) & (Stock[[Istock]]$Ass$Clean.up=="Default" || Stock[[Istock]]$Ass$Clean.up=="Full"))
    {
     file.remove(SS.exe)
     file.remove("echoinput.sso")

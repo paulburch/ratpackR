@@ -43,6 +43,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 0 | – | baseline (unfixed) | 20 CONFIRMED | pass / pass (E99 pass) | – (repeat run identical) | – |
 | 1 | #1 FixedCosts NA | default 0 if 5th value absent | B02, B02b fixed; others unchanged | pass / pass | Cost/Profit columns NA → numbers only | safe |
 | 2 | #2 SetBuffer | Buffer = max(Min, Buffer×TimeBuffer) (intent to confirm) | B01 fixed; others unchanged | pass / pass | 2026 TAC ×0.9 (6727→6054 t E1); 2027 state follows | works; changes buffer-study TACs |
+| 3 | #3 clean-up never runs | `!Estimation.test %in% 99` → `Estimation.test %in% 99` | none changed | pass / pass (E99 pass) | E1/E2 identical; E99 folder 11 MB → 1.7 MB | safe |
 
 ## Notes per step
 
@@ -75,3 +76,17 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Verdict:** works as intended, with no side effects. **This changes TACs in the
   buffer-study inputs** (`Inputs Buffer/Silver.warehou.EM`, default 0.9). Any earlier buffer
   results with that file did not include the 0.9 default.
+
+### Step 3: bug #3, SS folder clean-up never runs (`Assessment.R:1844`)
+- **Change:** `if (!Estimation.test %in% c(99) & ...)` becomes `if (Estimation.test %in% c(99) & ...)`.
+- **Checks:** none changed. No check exercises the clean-up.
+- **Smoke tests:** E1 87 s, E2 92 s, E99 95 s; all exit 0. E1 and E2 outputs are identical,
+  as expected, because they return before the clean-up.
+- **E99:** the EM folder shrank from **11 MB to 1.7 MB**. It keeps `Report.sso`, `data.dat`,
+  `data.ctl`, `starter.ss`, `forecast.ss`, `ss3a.par` and `ss3.log`; the `ss3` binary, `.sso`
+  dumps and `ss3.par/.rep` are deleted. TACs are computed before the clean-up, so results are
+  unaffected. Each assessment writes a new folder and `.par` file, so later assessments do
+  not need the deleted files. `Check.Setup.R` reads `Report.sso`, which is kept.
+- **Remaining warnings:** `cannot remove file 'FALSE'`, from bug #23 (`showWarnings=F`), and
+  `cannot remove file 'ss.log'` (SS writes `ss3.log` on Linux).
+- **Verdict:** safe; nothing else breaks.
