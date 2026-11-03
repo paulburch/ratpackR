@@ -57,7 +57,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 14 | #14 Tier 5 / no TAC management crash | TAC array set to 0 (F from F.fix) | none changed | pass / pass | identical; Tier 5 run: old crashes, new completes | safe, verified end-to-end |
 | 15 | #15 CatchType 3 index | F.Selex.Inp[,Ifleet,] (zero F fill still open) | none changed (B12 is a demo) | pass (E1 only) | identical | crash fixed; CatchType 3 still needs data |
 | 16 | #16 Tier 4a map logr | logR | none changed (B20 is a demo) | P.cod Tier 4a: old crashes, new completes | n/a | safe; Tier 4a gives RBC 0 for P.cod in both settings (investigate) |
-| 17 | #17 Parallel drift | not attempted (needs a rebuild of the parallel files) | – | – | – | open |
+| 17 | #17 Parallel drift | **rebuilt** as a thin driver over the current engine (`DoRunParallel`) | – | serial vs parallel, 2 sims E99 | all 11 outputs identical | done (see Additional work) |
 | 18 | #18 CPUE double selectivity | drop SelexAge (already in SelRetWghtAge) | none changed | pass / pass | identical (0/1 selectivity in all inputs) | safe |
 | 19 | #19 CatchDiscardl typo | CatchDiscard; $Full → $FullF | none changed | pass (E1) | ProjectFleetArea discards 0 → 6792 t (= ProjectAll) | safe |
 | 20 | #20 rec-dev bias ramp | calendar years; 1 → 0 over the ramp | none changed (B13 is a demo) | pass / pass | identical | safe |
@@ -651,3 +651,30 @@ completed (E1 96 s, E2 98 s, E99 102 s).
   - equilibrium catch, closed areas and implementation error.
 
   Multi-stock and multi-area behaviour was verified only with synthetic checks.
+
+## Additional work (requested 2026-11-03)
+
+### Step 17 (done): bug #17, parallel version rebuilt (`R Inserts/Parallel/RatpackR.R`)
+- **Change:** the old file was a separate, older copy of the whole engine. It is replaced by a
+  **thin driver** that sources the current `RatpackR.R`, so there is one code base, and adds
+  `DoRunParallel(GeneralFile, RunNo, n_cores)`:
+  1. The master reads the general file, makes the same seeds as `DoRun()`, and tunes R0 on
+     simulation 1 exactly as `DoRun()` does.
+  2. Each simulation runs on a worker of a socket cluster (`parallel::makePSOCKcluster`,
+     which works on Windows and Linux), writing to per-simulation files.
+  3. The master appends those files in simulation order to the normal output files, so the
+     format matches a serial run.
+  - Unlike `DoRun()`, every simulation is run whatever `Estimation.test` is.
+  - No `foreach`/`doParallel` is needed. Per-simulation debug files are kept as
+    `Debug_*.Out.sim<k>`.
+- **`R Inserts/Parallel/Assessment.R`** is not sourced by anything (the old parallel driver
+  already sourced the main `R Inserts/Assessment.R`). It is left in place, unused; it can be
+  deleted once André agrees.
+- **Smoke script:** `RunStreams/RunSmokeTest.R` takes optional 5th (Nsim) and 6th (n_cores)
+  arguments; n_cores > 0 uses `DoRunParallel`.
+- **Test:** Silver.warehou, `Estimation.test 99` (stochastic data, SS estimation), **2
+  simulations**, serial `DoRun` vs `DoRunParallel` on 2 workers. Serial took 180 s and parallel
+  177 s; each worker spends about 60 s compiling and tuning, so the speed-up only shows with
+  more simulations than workers. **All 11 output files are identical** for both simulations.
+- **Verdict:** done. The parallel and serial versions give the same results and can no longer
+  drift apart.

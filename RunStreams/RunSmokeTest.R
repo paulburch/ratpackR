@@ -7,7 +7,8 @@
 # "Inputs Buffer/" (the RunBuffer.R set-up) is used by default.
 #
 # Usage (from the repo root):
-#   Rscript RunStreams/RunSmokeTest.R [Estimation.test] [Nproj] [source input folder] [species]
+#   Rscript RunStreams/RunSmokeTest.R [Estimation.test] [Nproj] [source input folder] [species] [Nsim] [n_cores]
+#   n_cores > 0 runs DoRunParallel() from "R Inserts/Parallel/RatpackR.R" (default 0 = serial DoRun)
 #   e.g. Rscript RunStreams/RunSmokeTest.R 1 1    # no estimation
 #        Rscript RunStreams/RunSmokeTest.R 2 1    # deterministic data, with estimation
 rm(list=ls())
@@ -20,6 +21,8 @@ Estimation.test <- if (length(args) >= 1) as.numeric(args[1]) else 1
 NPROJ <- if (length(args) >= 2) as.numeric(args[2]) else 1
 Source.Folder <- if (length(args) >= 3) args[3] else "Inputs Buffer/"
 Species <- if (length(args) >= 4) args[4] else "Silver.warehou"
+NSIM <- if (length(args) >= 5) as.numeric(args[5]) else 1
+NCORES <- if (length(args) >= 6) as.numeric(args[6]) else 0
 
 library(r4ss)
 library(RTMB)
@@ -33,11 +36,11 @@ for (f in c(paste0("General_", Species, ".OM"), paste0(Species, c(".OM", ".EM", 
   file.copy(paste0(Path, Source.Folder, f), paste0(Path, Input.Folder, f), overwrite = TRUE)
 GenFile <- paste0(Path, Input.Folder, "General_", Species, ".OM")
 Gen <- readLines(GenFile)
-Gen <- sub("^#Number_of_simulations.*", "#Number_of_simulations 1", Gen)
+Gen <- sub("^#Number_of_simulations.*", paste("#Number_of_simulations", NSIM), Gen)
 Gen <- sub("^#Number_of_projection_years.*", paste("#Number_of_projection_years", NPROJ), Gen)
 writeLines(Gen, GenFile)
 
-source("RatpackR.R")
+if (NCORES > 0) source("R Inserts/Parallel/RatpackR.R") else source("RatpackR.R")
 
 # --- run flags (same logic as RunStreams/RunCSIRO.R) --------------------------
 TestCase <- F
@@ -55,9 +58,10 @@ if (Estimation.test %in% c(4)) { Huge.sample.sizes <- T }
 if (Estimation.test %in% c(5)) { Huge.sample.sizes <- T }
 if (Estimation.test %in% c(6)) { Huge.sample.sizes <- T; Deter.Index.data <- T; Deter.Discard.data <- T; Deter.Length.data <- T; Deter.Age.data <- T }
 
-RunNo <- paste0("Smoke_", Species, "_E", Estimation.test)
+RunNo <- paste0("Smoke_", Species, "_E", Estimation.test, if (NCORES > 0) "_par" else "")
 t0 <- proc.time()
-DoRun(GeneralFile = paste0("General_", Species, ".OM"), RunNo = RunNo)
+if (NCORES > 0) DoRunParallel(GeneralFile = paste0("General_", Species, ".OM"), RunNo = RunNo, n_cores = NCORES) else
+  DoRun(GeneralFile = paste0("General_", Species, ".OM"), RunNo = RunNo)
 cat("SMOKE TEST FINISHED: Estimation.test =", Estimation.test, " Nproj =", NPROJ,
     " elapsed =", round((proc.time() - t0)[["elapsed"]], 1), "s\n")
 print(list.files(paste0(Path, "Results/", RunNo)))
