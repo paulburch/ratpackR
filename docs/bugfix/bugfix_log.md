@@ -82,7 +82,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 41–42 | S#41 insurance hard-codes; S#42 predators | no change (unused; needs design) | – | – | – | for André |
 | 43 | S#43 CVoption 3/4 | stop() with message | none changed | pass (E1); CVoption 3 copy stops clearly | identical | safe |
 | 44 | S#44 hard-coded 50s / dead code | no change (refactor, not a fix) | – | – | – | left as is |
-| 45 | S#45 Tier 4a RBC 0 for P.cod | investigated; nlminb-limits fix tested, not kept | – | P.cod trace: fit not converged, depletion 0.11 vs true 0.49 | – | input issue (r prior SD 0.0001, CVMSYL 0.002); for André |
+| 45 | S#45 Tier 4a RBC 0 for P.cod | investigated; nlminb-limits fix tested, not kept | – | P.cod trace: fit not converged, depletion 0.11 vs true 0.49 | – | misspecified MSYL anchor years (true 1985–95 depletion 85–132%, model assumes 40%); see 45b; for André |
 
 ## Notes per step
 
@@ -701,3 +701,34 @@ completed (E1 96 s, E2 98 s, E99 102 s).
 - **Smoke test:** E1 (`CatchType 1`) is identical.
 - **Verdict:** done. `CatchType` 3 now runs and reproduces the assessment's catches. It needs
   (a) no depletion tuning, and (b) complete F inputs for the last years.
+
+### Step 45b: #45 Tier 4a P.cod, follow-up with looser priors and stochastic data
+`docs/bugfix/tier4a_trace.R` now takes the env vars `T4A_DIR` (input folder) and `T4A_E`
+(`Estimation.test`). All runs below trace the first Tier 4a assessment (2024); true SSB
+depletion is 0.49.
+
+| Run | Data | r prior SD | CVMSYL | nlminb limits | Converged | r | Estimated depletion | RBC |
+|---|---|---|---|---|---|---|---|---|
+| P.cod settings | deterministic (E1) | 0.0001 | 0.002 | default | no | 0.150 | 0.112 | 0 |
+| P.cod settings | deterministic (E1) | 0.0001 | 0.002 | raised | no | 0.150 | 0.087 | 0 |
+| loose r | deterministic (E1) | 0.5 | 0.002 | default | no | 0.784 | 0.146 | 0 |
+| loose r + MSYL | deterministic (E1) | 0.5 | 0.2 | default | no | 0.487 | 0.104 | 0 |
+| loose r + MSYL | deterministic (E1) | 0.5 | 0.2 | raised | no (objective still falling) | 0.445 | 0.085 | 0 |
+| **P.cod settings** | **stochastic (E99)** | 0.0001 | 0.002 | default | **yes** | 0.150 | **0.099** | 0 |
+| **loose r + MSYL** | **stochastic (E99)** | 0.5 | 0.2 | default | **yes** | 0.084 | **0.112** | 0 |
+
+- **Non-convergence is a test artefact.** With deterministic data (`Estimation.test 1/2`),
+  the CPUE has no noise. The estimated CPUE SD goes to 0 and the objective falls without
+  bound (−151 → −546). With stochastic data the fit converges. **Tier 4a should be tested
+  with stochastic data, `Estimation.test 99`.**
+- **The low depletion is a misspecified assumption, not a code error.** True P.cod
+  depletion in the OM was 44% in 1977 and **85–132% of unfished in 1985–1995**, above B0
+  because of the `#Early_R0Mult` regime. Tier 4a assumes B = K in the first year and, via
+  `#Tier_4a:MSYRY1/2 1985/1995` with `CVMSYL`, that 1985–1995 biomass averaged **BMSY = 0.4 K**.
+  To satisfy that, the model inflates K (4.2e6) and estimates current depletion at about
+  0.1, so the harvest rule (alpha 0.2) gives RBC = 0. Loosening the r prior or CVMSYL
+  doesn't change this, because the anchor years themselves are wrong for this OM.
+- **Suggestion for André or Paul:** choose `MSYRY1/2` years when the stock was plausibly near
+  BMSY, or drop the MSYL penalty for P.cod. Also consider whether Tier 4a should start from a
+  depletion other than 1. The `nlminb` control misplacement (step 45) remains a minor
+  separate issue; not kept.

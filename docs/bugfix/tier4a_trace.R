@@ -1,6 +1,6 @@
-# Trace one Tier 4a assessment for P.cod and report the fit
-Path <- "/home/user/ratpackR/"; setwd(Path); args <- c("1","1","Temp/Tier4aDefault/","P.cod")
-src <- readLines("RunStreams/RunSmokeTest.R"); src <- sub("^args <- commandArgs.*", "args <- c('1','1','Temp/Tier4aDefault/','P.cod')", src)
+# Trace one Tier 4a assessment (P.cod) and report the fit. Input folder: env T4A_DIR (default Temp/Tier4aDefault/)
+Path <- "/home/user/ratpackR/"; setwd(Path)
+src <- readLines("RunStreams/RunSmokeTest.R"); src <- sub("^args <- commandArgs.*", "args <- c(Sys.getenv('T4A_E','1'),'1',Sys.getenv('T4A_DIR','Temp/Tier4aDefault/'),'P.cod')", src)
 cut <- grep("^RunNo <- ", src); eval(parse(text = src[1:(cut-1)]))
 trace("Run_Tier4a", exit = quote(assign("T4", list(Report = Report, fit = fit, rep2 = rep2, data = data, Year = Year, Istock = Istock), envir = .GlobalEnv)), print = FALSE)
 DoRun(GeneralFile = "General_P.cod.OM", RunNo = "T4aTrace")
