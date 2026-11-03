@@ -126,7 +126,7 @@ DataGen <- function(Istock,Year,BioPreds)
             set.seed(Stock[[Istock]]$Data$Age.seeds[IassArea,Itype,Year,Ifleet])
             Nsamp <- Stock[[Istock]]$Data$Age.spec[IassArea,Itype,Year,Ifleet]
             Observed <- as.vector(rmultinom(1,Nsamp,prob=Expected))
-            if (TestCase==T || Deter.Age.data == T) Observed <- Nsamp*Expected
+            if (TestCase==T || Deter.Age.data == T) Observed <- Nsamp*Expected/sum(Expected)   # FIX #36: proportions, as for lengths
             if (Itype==1) Part <- 2; if (Itype==2) Part <- 1; if (Itype==3) Part <- 0;
             if (Nsex==1) Vec1 <- c(IassArea,Year+YrOffset,7,Ifleet,0,Part,1,-1,-1,Nsamp)
             if (Nsex==2) Vec1 <- c(IassArea,Year+YrOffset,7,Ifleet,3,Part,1,-1,-1,Nsamp)
@@ -181,7 +181,7 @@ DataGen <- function(Istock,Year,BioPreds)
                   {
                     Nsamp <- LenSampleSize[Ilen]
                     Observed <- as.vector(rmultinom(1,Nsamp,prob=Expected))
-                    if (TestCase==T || Deter.Age.data==T) Observed <- Nsamp*Expected
+                    if (TestCase==T || Deter.Age.data==T) Observed <- Nsamp*Expected/sum(Expected)   # FIX #36
                     if (Nsex==1) Vec1 <- c(IassArea,Year+YrOffset,7,Ifleet,0,Part,1,Ilen,Ilen,Nsamp)
                     if (Nsex==2) Vec1 <- c(IassArea,Year+YrOffset,7,Ifleet,Isex,Part,1,Ilen,Ilen,Nsamp)
                     if (Nsex==1) Vec1 <- c(Vec1,Observed)
@@ -240,7 +240,7 @@ DataGen <- function(Istock,Year,BioPreds)
           set.seed(Stock[[Istock]]$Data$Pred.age.seeds[Year,Ipred])
           Nsamp <- Stock[[Istock]]$Data$Pred.age.spec[Year,Ipred]
           Observed <- as.vector(rmultinom(1,Nsamp,prob=Expected))
-          if (TestCase==T || Deter.Age.data == T) Observed <- Nsamp*Expected
+          if (TestCase==T || Deter.Age.data == T) Observed <- Nsamp*Expected/sum(Expected)   # FIX #36
           if (Nsex==1) Vec1 <- c(Year+YrOffset,7,General$Nfleet+Ipred,0,0,1,-1,-1,Nsamp)
           if (Nsex==2) Vec1 <- c(Year+YrOffset,7,General$Nfleet+Ipred,3,0,1,-1,-1,Nsamp)
           Vec1 <- c(Vec1,Observed)

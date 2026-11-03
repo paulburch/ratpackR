@@ -74,6 +74,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 32 | S#32 `<-` on globals | `<<-` for General$Nsim and Stock$TheTACs | none changed | pass (E1); E0 before = after | identical | safe |
 | 33–34 | S#33 TAC slot 50; S#34 one-sim return | no change (harmless / intended) | – | – | – | left as is |
 | 35 | S#35 DataGen multi-area discards & CAA | sum over the assessment area's biological areas | none changed | pass / pass; CAA copy: old = new (127 rows) | identical (1 area) | safe; Write_data split left (design) |
+| 36 | S#36 deterministic ages not normalised | Nsamp×Expected/sum | none changed | pass / pass | E1 identical; E2 parameters ≤1.9e-5 rel., TAC identical | safe |
 
 ## Notes per step
 
@@ -498,3 +499,16 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   of size 1 has observations summing to about 5, and one of size 2 about 57.
 - **Checks:** none changed.
 - **Verdict:** safe; it only changes results with several areas per assessment area.
+
+### Step 36: suspected #36, deterministic age/CAA observations not normalised (`DataGen.R:129, 184, 243`)
+- **Change:** `Observed <- Nsamp*Expected/sum(Expected)` for marginal ages, CAA and
+  predator ages, as is already done for lengths (line 80).
+- **Smoke tests:** E1 92 s and E2 105 s, both exit 0.
+  - E1 (no estimation) is identical.
+  - E2 (estimation): parameter estimates change by at most 1.9e-5 relative, the reported
+    final maximum gradient (`ProjectMisc`) by 1%, and the estimated SSB series by 3.5e-6.
+    The 2026 RBC (2627.52 t) and final TAC (1932.77 t) are **identical** to 2 dp.
+  - This confirms that SS normalises compositions, so the old scaling only nudged the
+    optimiser path.
+- **Checks:** none changed.
+- **Verdict:** safe; the data files are now proportions times sample size, as intended.
