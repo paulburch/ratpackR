@@ -108,7 +108,7 @@ DataGen <- function(Istock,Year,BioPreds)
           for (Iarea in Use)
           {
             if (Itype==1) Expected <- Expected + Stock[[Istock]]$CatchAtAgeRet[Iarea,Ifleet,,,Year]+1.0e-10
-            if (Itype==2) Expected <- Expected + Stock[[Istock]]$CatchAtAgeTot[Iarea,Ifleet,,,Year]-Stock[[Iarea,Istock]]$CatchAtAgeRet[Ifleet,,,Year]+1.0e-10
+            if (Itype==2) Expected <- Expected + Stock[[Istock]]$CatchAtAgeTot[Iarea,Ifleet,,,Year]-Stock[[Istock]]$CatchAtAgeRet[Iarea,Ifleet,,,Year]+1.0e-10
             if (Itype==3) Expected <- Expected + Stock[[Istock]]$CatchAtAgeTot[Iarea,Ifleet,,,Year]+1.0e-10
           } 
           # Allow for ageing error

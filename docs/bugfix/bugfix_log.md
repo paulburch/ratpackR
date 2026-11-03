@@ -53,6 +53,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 10 | #10 Early-R0 block-end name | single name .end.yrs with default | B04 fixed; others unchanged | pass / pass | identical | safe |
 | 11 | #11 catch-bias rows | per-fleet row; fill to last model year | B03a, B03b fixed; others unchanged | pass / pass | identical (all biases 1) | safe |
 | 12 | #12 Tier 4b CPUE limit | compare with Cpue.limit | none changed (B06 is a stand-alone demo; rule verified separately) | pass (E1 only) | identical (Tier 4b unused) | safe; not run end-to-end |
+| 13 | #13 DataGen discard ages | Stock[[Istock]]...[Iarea,...] | none changed (B07 is a demo) | pass (E1 only) | identical; with discard ages on: old code crashes, new code runs | safe, verified end-to-end |
 
 ## Notes per step
 
@@ -204,3 +205,17 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Smoke test:** E1 only, 90 s, exit 0. Outputs are identical; Tier 4b is not used by any
   current input.
 - **Verdict:** safe, but not exercised end to end.
+
+### Step 13: bug #13, discard-age expected values (`DataGen.R:111`)
+- **Change:** `Stock[[Iarea,Istock]]$CatchAtAgeRet[Ifleet,,,Year]` becomes
+  `Stock[[Istock]]$CatchAtAgeRet[Iarea,Ifleet,,,Year]`.
+- **Checks:** none changed. B07 demonstrates the list-indexing error in isolation.
+- **Smoke test:** E1 only, 91 s, exit 0. Outputs are identical; the standard inputs have no
+  discard age data.
+- **End-to-end test of the branch:** a copy of the Silver.warehou inputs
+  (`Temp/DiscAgeInputs/`) with discard-age samples for fleet 1 in 2015–2019 (EFN 100):
+  - **old code:** the run stops with `Error in Stock[[Iarea, Istock]] : incorrect number of
+    subscripts`;
+  - **fixed code:** the run completes (E1, 81 s), and the 5 discard-age samples
+    (partition 1) are written to the SS `data.dat`.
+- **Verdict:** safe; the fix is confirmed by running the branch end to end.
