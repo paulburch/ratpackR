@@ -1311,7 +1311,7 @@ Do.Project <- function(Isim)
         Stock[[Istock]]$TACsStep[6,Iyear] <<- Stock[[Istock]]$TACs[Iyear]
        } # If
     
-    for(Istocks in 1:Nstocks)
+    for(Istock in 1:Nstocks)   # FIX #4: was Istocks
      for (IassArea in 1:Stock[[Istock]]$NassArea)
        {
         Alloc.vals <- Stock[[Istock]]$Ass$Relallocation.vals+1.0e-10

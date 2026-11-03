@@ -44,6 +44,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 1 | #1 FixedCosts NA | default 0 if 5th value absent | B02, B02b fixed; others unchanged | pass / pass | Cost/Profit columns NA → numbers only | safe |
 | 2 | #2 SetBuffer | Buffer = max(Min, Buffer×TimeBuffer) (intent to confirm) | B01 fixed; others unchanged | pass / pass | 2026 TAC ×0.9 (6727→6054 t E1); 2027 state follows | works; changes buffer-study TACs |
 | 3 | #3 clean-up never runs | `!Estimation.test %in% 99` → `Estimation.test %in% 99` | none changed | pass / pass (E99 pass) | E1/E2 identical; E99 folder 11 MB → 1.7 MB | safe |
+| 4 | #4 Istocks loop | loop variable Istock | B09 fixed; others unchanged | pass / pass | identical (single stock) | safe; multi-stock untested end-to-end |
 
 ## Notes per step
 
@@ -90,3 +91,13 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 - **Remaining warnings:** `cannot remove file 'FALSE'`, from bug #23 (`showWarnings=F`), and
   `cannot remove file 'ss.log'` (SS writes `ss3.log` on Linux).
 - **Verdict:** safe; nothing else breaks.
+
+### Step 4: bug #4, allocation loop `Istocks` (`RatpackR.R:1314`)
+- **Change:** `for(Istocks in 1:Nstocks)` becomes `for(Istock in 1:Nstocks)`.
+- **Checks:** B09 changed to NOT REPRODUCED. No other check changed.
+- **Smoke tests:** E1 84 s and E2 92 s, both exit 0. All outputs are identical, as expected
+  for a single stock (`Istock` was already 1).
+- **Limit:** the multi-stock effect (each stock re-allocated, not only the last) could not be
+  run end to end, because there are no complete multi-stock inputs.
+- **Verdict:** safe for single-stock runs; the multi-stock behaviour is untested beyond the
+  code check.
