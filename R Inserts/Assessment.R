@@ -2228,7 +2228,7 @@ Run_Tier4b<- function(Isim,Istock,Year)
   Max.catch <- Stock[[Istock]]$Ass$Tier4b$Max.catch
   
   # Calculate the RBC
-  if (CpueAvg  <= Stock[[Istock]]$Ass$Tier4b$Cpue_lim)
+  if (CpueAvg  <= Cpue.limit)   # FIX #12: was Tier4b$Cpue_lim (partial match to Cpue_limit_mult)
     mult <- 0.0
   else
     mult <- (CpueAvg-Cpue.limit)/(Cpue.target-Cpue.limit);

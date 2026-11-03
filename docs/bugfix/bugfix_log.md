@@ -52,6 +52,7 @@ can be rebuilt by re-running the script. The summary of each step is copied into
 | 9 | #9 steepness bias | h_init = h × bias (negative = fixed) | B05 fixed; others unchanged | pass / pass | identical (Silver uses fixed h) | safe; watch h bounds >1 |
 | 10 | #10 Early-R0 block-end name | single name .end.yrs with default | B04 fixed; others unchanged | pass / pass | identical | safe |
 | 11 | #11 catch-bias rows | per-fleet row; fill to last model year | B03a, B03b fixed; others unchanged | pass / pass | identical (all biases 1) | safe |
+| 12 | #12 Tier 4b CPUE limit | compare with Cpue.limit | none changed (B06 is a stand-alone demo; rule verified separately) | pass (E1 only) | identical (Tier 4b unused) | safe; not run end-to-end |
 
 ## Notes per step
 
@@ -191,3 +192,15 @@ can be rebuilt by re-running the script. The summary of each step is copied into
   are currently 1.
 - **Smoke tests:** E1 89 s and E2 92 s, both exit 0. Outputs are identical.
 - **Verdict:** safe.
+
+### Step 12: bug #12, Tier 4b CPUE limit (`Assessment.R:2231`)
+- **Change:** `if (CpueAvg <= Cpue.limit)`. The old test used `Tier4b$Cpue_lim`, which
+  partially matched the multiplier `Cpue_limit_mult`.
+- **Checks:** none changed. B06 demonstrates R's partial matching in isolation, so it still
+  says CONFIRMED. The corrected rule was checked separately (target 1, limit 0.4): CPUE 0.2
+  and 0.4 give multiplier 0; 0.7 gives 0.5; 1.0 gives 1; 1.3 gives 1.5. The RBC can no
+  longer go negative. Above the target the multiplier exceeds 1, and only `Max.catch` caps
+  it; that is André's design and unchanged.
+- **Smoke test:** E1 only, 90 s, exit 0. Outputs are identical; Tier 4b is not used by any
+  current input.
+- **Verdict:** safe, but not exercised end to end.
