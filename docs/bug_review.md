@@ -25,7 +25,7 @@ platform-dependent SS call added for Linux.
 
 | # | Sev. | Where | Problem | Status |
 |---|---|---|---|---|
-| 1 | High | `ReadIn.R:1730` | `FixedCosts` is read from a 5th column that does not exist, so it is NA; Cost and Profit are NA in every output | Confirmed (test B02, smoke runs) |
+| 1 | High | `ReadIn.R:1730` | `FixedCosts` is read from a 5th column that does not exist, so it is NA; Cost and Profit are NA in every output (probably a feature in development) | Confirmed (test B02, smoke runs) |
 | 2 | High | `RatpackR.R:24-29` | `SetBuffer`: the default buffer is computed and then overwritten, so it is never applied | Confirmed (test B01) |
 | 3 | High | `Assessment.R:1844` | The SS clean-up block can never run (`!Estimation.test %in% 99` after an early return for `< 99`); about 11 MB is left per assessment | Confirmed (smoke run, `Estimation.test = 99`) |
 | 4 | High (multi-stock) | `RatpackR.R:1314` | Allocation loop variable `Istocks`, but the body uses `Istock`; only the last stock is re-allocated | Confirmed (test B09) |
@@ -58,6 +58,11 @@ platform-dependent SS call added for Linux.
 ### 1. `FixedCosts` read from a non-existent column; all costs and profits are NA
 - **Where:** `R Inserts/ReadIn.R:1730`; the writer is `R Inserts/SaveFiles.R:393`; used in
   `RatpackR.R:631` and `Model.cpp:274`.
+- **Qualification (Paul):** this is probably a placeholder for a feature still in development
+  (fixed costs per fleet), added to the reader before the input writer and input files were
+  updated. If so, the defect is the half-added input that turns Cost and Profit into NA, not
+  wrong economics. The suggested fix (default to 0 when the value is absent) keeps the
+  feature available once 5-column inputs exist.
 - **Trigger:** any run. Every `.OM` file in the repository has 4 numbers per fleet in
   `#Econ_parameters` (`1 1 1 1  # Fleet1`), as `SaveFiles.R` writes them. Column 5 is the
   comment character `#`.
