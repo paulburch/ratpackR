@@ -45,6 +45,8 @@ if (Estimation.test %in% c(4)) { Huge.sample.sizes <- T }
 if (Estimation.test %in% c(5)) { Huge.sample.sizes <- T }
 if (Estimation.test %in% c(6)) { Huge.sample.sizes <- T; Deter.Index.data <- T; Deter.Discard.data <- T; Deter.Length.data <- T; Deter.Age.data <- T }
 
-Input.Folder <- "Inputs DD/"
+# RATPACK_DD_INPUTS: another input folder (e.g. a copy with more simulations);
+# RATPACK_DD_TAG: suffix for the results folder
+Input.Folder <- Sys.getenv("RATPACK_DD_INPUTS", unset="Inputs DD/")
 
-DoRun(GeneralFile=paste0("General_",Stock.Name,".OM"),RunNo=paste0(Stock.Name,".DD"))
+DoRun(GeneralFile=paste0("General_",Stock.Name,".OM"),RunNo=paste0(Stock.Name,".DD",Sys.getenv("RATPACK_DD_TAG")))
