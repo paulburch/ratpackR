@@ -12,7 +12,7 @@ RcppArmadillo 15.6.2.1, set up with `setup_linux.sh` (3 min 14 s). Key numbers a
 | Completed: 4 Tier_DD assessments, 10 projection years, exit 0 | All 10: Morwong, Bight redfish, Blue grenadier, Deepwater flathead, Mirror dory, Orange roughy east, Pink ling, Tiger flathead, School whiting, Silver warehou |
 
 - In the first round, Blue grenadier (negative variance from a 1-fish length comp) and Orange roughy east (no length data) failed at their first assessment. Both are fixed in `Run_DelayDiff` (§4.1, §4.2) and now complete.
-- Regression check after the fix: 8 of the other 9 stocks give byte-identical `Estimates` files. School whiting changes slightly (final-year depletion 0.292→0.293, 0.320→0.321, 0.515→0.518, 0.698→0.701), because comps with fewer than 3 occupied bins are now skipped.
+- Regression check after the fix: 7 of the other 8 stocks give byte-identical `Estimates` files. School whiting changes slightly (final-year depletion 0.292→0.293, 0.320→0.321, 0.515→0.518, 0.698→0.701), because comps with fewer than 3 occupied bins are now skipped.
 - The Morwong cloud run matches the single-stock cloud run of 3 Nov exactly (the estimates file is byte-identical between repeat runs), and it matches the Windows result: all TACs 0; estimated depletion 0.019 in 2020.
 - The EM depletion estimates are within about ±0.15 of the OM for Deepwater flathead, Mirror dory and Silver warehou (last three assessments). They are biased high for Bight redfish and Pink ling, and biased low for Morwong, Tiger flathead and School whiting (§3).
 
