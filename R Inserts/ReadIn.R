@@ -2248,7 +2248,7 @@ SetSpec <- function(Isim,Istock,StockName,Seed)
   # Tier DD specifications (Fournier-Doonan delay-difference; R Inserts/DelayDiff.R)
   # "#Tier_DD:<name> value(s)"; two values = prior mean and SD (SD <= 0: no prior).
   # NA defaults are species-specific and must be given when Type is Tier_DD.
-  Ass$DD <- list(Cpue_Area=1, Cpue_Index=1, Len_Area=1, Len_Fleet=1, Len_Part=0, MaxNsamp=1000,
+  Ass$DD <- list(Cpue_Area=1, Cpue_Index=1, Len_Area=1, Len_Fleet=1, Len_Part=0, MaxNsamp=1000, MinNsamp=0, MinBins=3,
                  kage=NA, Amax=100, gamma_sr=1, sigmaC=0.05, sigmaE=0.3, sigmaR=0.6,
                  lamM=0, lamL=c(1,1,1,1), Rho=c(NA,NA), Surv=c(NA,NA), Entry=c(NA,NA), Tauk=c(NA,NA),
                  Q2=c(0,0.5), Sigtau=NA, Linf_init=NA, beta_init=1, EstBeta="Yes", EstLinf="Yes", EstQ2="No",

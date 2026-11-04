@@ -431,12 +431,19 @@ Run_DelayDiff <- function(Isim, Istock, Year, Plot=F)
   Nsex <- Stock[[Istock]]$Nsex
   L1 <- L2 <- L3 <- L4 <- Mobs <- s2w <- nsamp <- rep(NA, Year)
   LD <- Stock[[Istock]]$Data$LengthData.Used
-  rows <- which(LD[,1] == DD$Len_Area & LD[,4] == DD$Len_Fleet & LD[,6] == DD$Len_Part & LD[,2] > 0)
+  # no length data at all (e.g. orange roughy): fit to catch and effort only
+  rows <- if (is.null(dim(LD))) integer(0) else
+    which(LD[,1] == DD$Len_Area & LD[,4] == DD$Len_Fleet & LD[,6] == DD$Len_Part & LD[,2] > 0)
   for (r in rows) {
     TheYear <- LD[r,2] - YrOffset
-    # comps in zero-catch years are generated from an almost empty catch
-    if (TheYear >= 1 && TheYear <= Year && LD[r,7] > 0 && Catch[TheYear] > 0) {
+    # comps in zero-catch years are generated from an almost empty catch;
+    # comps with a small stated sample size (MinNsamp) or few occupied bins
+    # (MinBins) are skipped: a one-bin comp has a negative variance after
+    # Sheppard's correction, which makes the moment likelihood NaN
+    if (TheYear >= 1 && TheYear <= Year && LD[r,7] >= max(DD$MinNsamp, 1e-8) && Catch[TheYear] > 0 &&
+        sum(LD[r, 7+(1:(Nsex*Nlen))] > 0) >= DD$MinBins) {
       mm <- DD_comp_moments(LD[r, 7+(1:(Nsex*Nlen))], lo, bwl, Nsex)
+      if (!(mm$L2 > 0)) next
       L1[TheYear] <- mm$L1; L2[TheYear] <- mm$L2
       L3[TheYear] <- mm$L3; L4[TheYear] <- mm$L4
       Mobs[TheYear] <- mm$Mw; s2w[TheYear] <- mm$s2w

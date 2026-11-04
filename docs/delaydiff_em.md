@@ -38,6 +38,7 @@ Two values are a prior mean and SD; an SD ≤ 0 means no prior. Options marked *
 | `Cpue_Area`, `Cpue_Index` | 1, 1 | CPUE index used to derive effort |
 | `Len_Area`, `Len_Fleet`, `Len_Part` | 1, 1, 0 | length comps used (Part: 0 total, 1 discard, 2 retained) |
 | `MaxNsamp` | 1000 | cap on the stated sample size |
+| `MinNsamp`, `MinBins` | 0, 3 | skip comps with a smaller stated sample size or fewer occupied bins (and any comp whose Sheppard-corrected variance is ≤ 0) |
 | `kage`* | | age at entry to group 1 |
 | `Amax` | 100 | ages used for the unfished state |
 | `gamma_sr`, `beta_init`, `EstBeta` | 1, 1, Yes | SR form, starting value / fixed value, estimate? |

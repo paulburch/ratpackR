@@ -9,10 +9,10 @@ RcppArmadillo 15.6.2.1, set up with `setup_linux.sh` (3 min 14 s). Key numbers a
 
 | Result | Stocks |
 |---|---|
-| Completed: 4 Tier_DD assessments, 10 projection years, exit 0 | Morwong, Bight redfish, Deepwater flathead, Mirror dory, Pink ling, Tiger flathead, School whiting, Silver warehou (8) |
-| Failed at the first assessment | Blue grenadier (negative variance from a 1-fish length comp; §4.1), Orange roughy east (no length data; §4.2) |
+| Completed: 4 Tier_DD assessments, 10 projection years, exit 0 | All 10: Morwong, Bight redfish, Blue grenadier, Deepwater flathead, Mirror dory, Orange roughy east, Pink ling, Tiger flathead, School whiting, Silver warehou |
 
-- No code in `R Inserts/` was changed. The two failures are robustness issues in `Run_DelayDiff` (§4). The fixes are described, not committed.
+- In the first round, Blue grenadier (negative variance from a 1-fish length comp) and Orange roughy east (no length data) failed at their first assessment. Both are fixed in `Run_DelayDiff` (§4.1, §4.2) and now complete.
+- Regression check after the fix: 8 of the other 9 stocks give byte-identical `Estimates` files. School whiting changes slightly (final-year depletion 0.292→0.293, 0.320→0.321, 0.515→0.518, 0.698→0.701), because comps with fewer than 3 occupied bins are now skipped.
 - The Morwong cloud run matches the single-stock cloud run of 3 Nov exactly (the estimates file is byte-identical between repeat runs), and it matches the Windows result: all TACs 0; estimated depletion 0.019 in 2020.
 - The EM depletion estimates are within about ±0.15 of the OM for Deepwater flathead, Mirror dory and Silver warehou (last three assessments). They are biased high for Bight redfish and Pink ling, and biased low for Morwong, Tiger flathead and School whiting (§3).
 
@@ -54,11 +54,13 @@ OM = SSB relative to the first model year, from `ProjectAll` (equal to the OM's 
 |---|---|---|---|---|
 | Morwong | 63 s | 2020, 23, 26, 29 | 0.019, 0.025, 0.033, 0.042 | 0.050, 0.076, 0.108, 0.149 |
 | Bight redfish | 50 s | 2021, 24, 27, 30 | 0.827, 0.798, 0.599, 0.564 | 0.634, 0.531, 0.409, 0.349 |
+| Blue grenadier | 56 s | 2021, 24, 27, 30 | 0.742, 0.711, 0.578, 0.747 | 0.936, 1.001, 0.885, 0.809 |
 | Deepwater flathead | 56 s | 2022, 25, 28, 31 | 0.275, 0.425, 0.560, 0.694 | 0.401, 0.482, 0.572, 0.681 |
 | Mirror dory | 50 s | 2025, 28, 31, 34 | 1.046, 1.443, 0.978, 0.803 | 0.915, 1.755, 1.038, 0.791 |
+| Orange roughy east | 64 s | 2020, 23, 26, 29 | 0.281, 0.281, 0.299, 0.307 | 0.241, 0.256, 0.267, 0.270 (`Total_Depletion` 0.302–0.338) |
 | Pink ling | 73 s | 2025, 28, 31, 34 | 0.370, 0.717, 1.161, 1.044 | 0.375, 0.446, 0.484, 0.528 |
 | Tiger flathead | 81 s | 2025, 28, 31, 34 | 0.116, 0.209, 0.394, 0.550 | 0.367, 0.495, 0.723, 0.759 |
-| School whiting | 39 s | 2025, 28, 31, 34 | 0.292, 0.320, 0.515, 0.698 | 0.464, 0.646, 0.788, 1.290 |
+| School whiting | 40 s | 2025, 28, 31, 34 | 0.293, 0.321, 0.518, 0.701 | 0.464, 0.646, 0.788, 1.290 |
 | Silver warehou | 104 s | 2025, 28, 31, 34 | 0.170, 0.654, 0.735, 0.681 | 0.563, 0.671, 0.736, 0.999 |
 
 Total TAC (t, summed over fleets) in each of the 10 projection years, under the placeholder HCR
@@ -68,11 +70,13 @@ Total TAC (t, summed over fleets) in each of the 10 projection years, under the 
 |---|---|
 | Morwong | 0 0 0 0 0 0 0 0 0 0 |
 | Bight redfish | 1357 1237 1130 1398 1275 1166 999 917 786 1065 |
+| Blue grenadier | 1447 1619 1676 2006 1935 1880 1666 1679 1693 1957 |
 | Deepwater flathead | 33 127 199 182 204 225 235 252 265 594 |
 | Mirror dory | 282 294 285 299 262 234 237 224 216 217 |
+| Orange roughy east | 1208 1303 1387 1192 1266 1330 1563 1598 1628 1671 |
 | Pink ling | 87 148 198 319 316 308 503 471 431 471 |
 | Tiger flathead | 0 0 79 173 281 449 671 807 934 942 |
-| School whiting | 96 264 315 181 287 333 331 373 403 405 |
+| School whiting | 96 263 314 181 286 332 331 373 402 405 |
 | Silver warehou | 32 50 58 509 469 421 544 502 446 442 |
 
 Notes:
@@ -84,10 +88,10 @@ Notes:
 
 ## 4. Issues found
 
-1. **Blue grenadier: all fits fail (NaN).** One retained length comp of fleet 4 contains a single fish (n = 1, one non-empty bin). With 2-cm bins, Sheppard's correction makes its variance negative (0.0 − 2²/12 = −0.333). Then `sqrt(L2o/n)` in the length-moment likelihood (`R Inserts/DelayDiff.R`, `f_dd`) is NaN, so every start fails and `Run_DelayDiff` stops with "all fits failed". Suggested fix in `Run_DelayDiff`: skip comps whose corrected variance is ≤ 0, or whose sample has fewer than a minimum number of fish (for example n < 10) or occupies fewer than 3 bins. A `MinNsamp` option would make the threshold explicit.
-2. **Orange roughy east: `Error in LD[, 1]: incorrect number of dimensions`.** The stock has no length data (age data only), so `Data$LengthData.Used` is not a matrix. Suggested fix: `if (is.null(dim(LD))) rows <- integer(0)`. Even then, the EM would be fitted to catch and an egg-survey index only. Orange roughy probably needs an age-based option, or should be left out of Tier_DD.
+1. **Blue grenadier: all fits fail (NaN). Fixed.** One retained length comp of fleet 4 contains a single fish (n = 1, one non-empty bin). With 2-cm bins, Sheppard's correction makes its variance negative (0.0 − 2²/12 = −0.333). Then `sqrt(L2o/n)` in the length-moment likelihood (`R Inserts/DelayDiff.R`, `f_dd`) is NaN, so every start fails and `Run_DelayDiff` stops with "all fits failed". Suggested fix in `Run_DelayDiff`: skip comps whose corrected variance is ≤ 0, or whose sample has fewer than a minimum number of fish (for example n < 10) or occupies fewer than 3 bins. **Applied:** `Run_DelayDiff` now skips comps with fewer than `MinBins` occupied bins (new option, default 3), a stated sample size below `MinNsamp` (new option, default 0 = off, because Morwong's EFNs are 5–45), or a corrected variance ≤ 0. Blue grenadier now completes. Its EM depletion is 0.58–0.75 against an OM of 0.81–1.00, i.e. biased low.
+2. **Orange roughy east: `Error in LD[, 1]: incorrect number of dimensions`. Fixed.** The stock has no length data (age data only), so `Data$LengthData.Used` is not a matrix. **Applied:** if `LD` has no dimensions, no comps are used, and the model is fitted to catch and effort (catch / egg-survey index, fleet 3) only, with the priors on growth. It completes, and its depletion (0.28–0.31) is close to OM SSB/SSB(first year) (0.24–0.27). But without length data, scale comes from the priors and a sparse index, so treat this with caution. Orange roughy probably needs an age-based option, or should be left out of Tier_DD.
 3. **`Inputs CSIROM/*.Sav` is not found on Linux.** `SetSpec` (`R Inserts/ReadIn.R`) loads `<Stock>.OM.SAV`, but `Inputs CSIROM/` spells the files `.OM.Sav`. `RunCSIROM.R` would fail on Linux for the same reason. The generator copies them as `.SAV`. A permanent fix is to rename the files in `Inputs CSIROM/` (a rename only, so it's safe for upstream merges), and it belongs with the `linux-portability` changes.
-4. **The OM's `Total_Depletion` for Morwong is not SSB/SSB(1915).** In `ProjectAll`, Morwong's `Total_Depletion` in 2020 is 15.98 %, but SSB(2020)/SSB(1915) is 0.050 (the 0.05 quoted in `docs/delaydiff_em.md`). The OM starts above SSB0 (`#Early_R0Mult 1.17`), so `Total_Depletion` uses a different reference than year 1. For the other stocks the two are equal. This matters for remaining-work item 2 in `docs/delaydiff_em.md` (which quantity to compare the EM with).
+4. **The OM's `Total_Depletion` for Morwong is not SSB/SSB(1915).** In `ProjectAll`, Morwong's `Total_Depletion` in 2020 is 15.98 %, but SSB(2020)/SSB(1915) is 0.050 (the 0.05 quoted in `docs/delaydiff_em.md`). The OM starts above SSB0 (`#Early_R0Mult 1.17`), so `Total_Depletion` uses a different reference than year 1. For Orange roughy east they also differ (`Total_Depletion` 0.30 against SSB/SSB(first year) 0.24 in 2020). For the other stocks the two are equal. This matters for remaining-work item 2 in `docs/delaydiff_em.md` (which quantity to compare the EM with).
 5. **Recurring warnings from the main code, not Tier_DD.** These occur for every stock:
    - `Totals + Outputs` "longer object length is not a multiple…" (`R Inserts/WriteOut.R` lines 294, 317, 479; 54–268 times per run);
    - `SetSpec` "NAs introduced by coercion" (6–27 times, while reading the inputs);
@@ -95,13 +99,13 @@ Notes:
 
    They do not stop the runs, but the `WriteOut.R` recycling may make some summary totals wrong. Worth checking with André.
 6. **EM bias pattern** (one realisation, so this is indicative only).
-   - Biased low (more pessimistic than the OM): Morwong, Tiger flathead, School whiting, Silver warehou in its first assessment.
+   - Biased low (more pessimistic than the OM): Morwong, Blue grenadier, Tiger flathead, School whiting, Silver warehou in its first assessment.
    - Biased high (more optimistic): Bight redfish, and Pink ling after its first assessment (EM > 1 by 2031).
    - Possible causes: generic priors (`Entry` 0.4 for every stock, `kage` = growth A_min, which is 8 for Bight redfish and 1 for four stocks), effort derived from one CPUE series, and comps from one fleet. Pink ling and Mirror dory are 4-area OMs whose catches are summed into one fishery.
 
 ## 5. Suggested next steps
 
-1. Fix §4.1 and §4.2 in `Run_DelayDiff`, then re-run Blue grenadier and Orange roughy.
+1. (Done) Fix §4.1 and §4.2 in `Run_DelayDiff`.
 2. Run several simulations per stock (for example 20) to separate bias from noise, and compare with Tier_1a and Tier_4a on the same OMs.
 3. Check the sensitivity to `Entry`, `kage` and the choice of CPUE and length fleets for the biased stocks (Bight redfish, Pink ling, Tiger flathead).
 4. Rename the `Inputs CSIROM/*.Sav` files (§4.3).
