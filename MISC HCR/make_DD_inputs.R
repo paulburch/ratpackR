@@ -18,7 +18,6 @@ Stocks <- list(
   Blue.grenadier     = "Inputs CSIRO/",
   Deepwater.flathead = "Inputs CSIRO/",
   Mirror.dory        = "Inputs CSIRO/",
-  Orange.roughy.east = "Inputs CSIRO/",
   Pink.ling          = "Inputs CSIRO/",
   Tiger.flathead     = "Inputs CSIROM/",
   School.whiting     = "Inputs CSIROM/",
@@ -75,7 +74,7 @@ for (St in names(Stocks)) {
   if (length(okL) > 0) { LenF <- okL[which.max(PastRet[okL])]; Part <- 2; Npast <- PastRet[LenF]
   } else { okL <- which(IsLen & FutTot > 0)
     if (length(okL) > 0) { LenF <- okL[which.max(PastTot[okL])]; Part <- 0; Npast <- PastTot[LenF]
-    } else { LenF <- 1; Part <- 0; Npast <- 0 } }       # no length data (e.g. orange roughy)
+    } else { LenF <- 1; Part <- 0; Npast <- 0 } }       # no length data
 
   r <- function(x, d=3) format(signif(x, d))
   Block <- c("",

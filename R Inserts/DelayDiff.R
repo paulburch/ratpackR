@@ -431,7 +431,7 @@ Run_DelayDiff <- function(Isim, Istock, Year, Plot=F)
   Nsex <- Stock[[Istock]]$Nsex
   L1 <- L2 <- L3 <- L4 <- Mobs <- s2w <- nsamp <- rep(NA, Year)
   LD <- Stock[[Istock]]$Data$LengthData.Used
-  # no length data at all (e.g. orange roughy): fit to catch and effort only
+  # no length data at all (e.g. age data only): fit to catch and effort only
   rows <- if (is.null(dim(LD))) integer(0) else
     which(LD[,1] == DD$Len_Area & LD[,4] == DD$Len_Fleet & LD[,6] == DD$Len_Part & LD[,2] > 0)
   for (r in rows) {
