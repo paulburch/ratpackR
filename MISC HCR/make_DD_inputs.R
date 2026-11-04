@@ -120,6 +120,14 @@ for (St in names(Stocks)) {
   EM <- append(EM, "#Ass_Basic:Type Tier_DD   (Fournier-Doonan delay-difference, R Inserts/DelayDiff.R)", after=it[1]-1)
   wr(c(EM, Block), paste0(OutDir, St, ".EM"))
   file.copy(paste0(Src, St, ".OM"), paste0(OutDir, St, ".OM"), overwrite=TRUE)
+  # saved OM/EM objects (SetSpec loads <Stock>.OM.SAV); Inputs CSIROM spells
+  # them ".Sav", which Linux does not match, so they are copied as ".SAV"
+  for (ext in c(".OM", ".EM")) {
+    sav <- paste0(Src, St, ext, c(".SAV", ".Sav"))
+    sav <- sav[file.exists(sav)][1]
+    if (is.na(sav)) stop("no saved object for ", St, ext)
+    file.copy(sav, paste0(OutDir, St, ext, ".SAV"), overwrite=TRUE)
+  }
 
   G <- rd(paste0(Src, "General_", St, ".OM"))
   G[which(startsWith(G, "#Number_of_simulations"))] <- "#Number_of_simulations 1"
