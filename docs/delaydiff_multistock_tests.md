@@ -104,9 +104,41 @@ Notes:
 ## 5. Suggested next steps
 
 1. (Done) Fix §4.1 in `Run_DelayDiff`; exclude Orange roughy east (§4.2).
-2. Run several simulations per stock (for example 20) to separate bias from noise, and compare with Tier_1a and Tier_4a on the same OMs.
+2. (Done for Tier_DD, §7) Run 20 simulations per stock. Comparison with Tier_1a on the same OMs: running. Tier_4a: not yet.
 3. Check the sensitivity to `Entry`, `kage` and the choice of CPUE and length fleets for the biased stocks (Bight redfish, Pink ling, Tiger flathead).
 4. Rename the `Inputs CSIROM/*.Sav` files (§4.3).
+
+## 7. Twenty simulations per stock (5 Nov 2026)
+
+Same inputs as §2 (`Inputs DD/`), but with `#Number_of_simulations 20`. The 20-simulation copies were made in `Temp/InputsDD20/` and run with `RATPACK_DD_INPUTS=Temp/InputsDD20/ RATPACK_DD_TAG=20 Rscript RunStreams/RunDDStock.R <Stock>`, so the results are in `Results/<Stock>.DD20/`. The seeds are ratpackR's defaults (`TheSeeds <- 1234`), so simulation 1 matches the single runs in §3.
+
+All 9 stocks completed all 20 simulations (80 Tier_DD fits each, no errors), in 6–20 minutes per stock with 4 runs in parallel.
+Per-simulation results are in [`results/tier_dd_20sims_by_sim.csv`](results/tier_dd_20sims_by_sim.csv) and the summary in [`results/tier_dd_20sims_summary.csv`](results/tier_dd_20sims_summary.csv).
+
+Relative error (RE) = (EM − OM)/OM in the final-year depletion of each assessment. EM = fished-group biomass relative to year 1; OM = SSB relative to the first model year, from the same simulation. A1 and A4 are the first and fourth assessments. The ranges are 10th–90th percentiles over the 20 simulations.
+
+| Stock | Median RE, A1 | Median RE, A4 | Median \|RE\|, all | EM depletion, A4 | OM depletion, A4 | Mean annual catch (t) | Gradient msgs |
+|---|---|---|---|---|---|---|---|
+| Morwong | −0.60 | −0.60 | 0.64 | 0.05 (0.04–0.10) | 0.15 (0.10–0.19) | 0 (all years 0) | 1 |
+| Bight redfish | +0.36 | +0.43 | 0.48 | 0.43 (0.29–0.62) | 0.28 (0.22–0.60) | 1186 (950–1379) | 3 |
+| Blue grenadier | −0.13 | −0.28 | 0.28 | 0.59 (0.43–0.75) | 0.82 (0.60–0.97) | 1899 (1636–2469) | 0 |
+| Deepwater flathead | −0.28 | +0.01 | 0.17 | 0.64 (0.38–0.87) | 0.64 (0.46–0.81) | 315 (252–471) | 0 |
+| Mirror dory | +0.12 | +0.19 | 0.15 | 0.97 (0.74–1.18) | 0.77 (0.63–1.06) | 264 (211–355) | 0 |
+| Pink ling | −0.01 | −0.03 | 0.16 | 0.59 (0.40–0.82) | 0.62 (0.53–0.72) | 220 (67–383) | 4 |
+| Tiger flathead | −0.70 | −0.20 | 0.51 | 0.54 (0.45–0.78) | 0.75 (0.53–1.12) | 479 (316–612); 18 % of years 0 | 7 |
+| School whiting | −0.47 | −0.37 | 0.43 | 0.56 (0.33–0.90) | 0.88 (0.64–1.26) | 399 (295–666) | 4 |
+| Silver warehou | −0.09 | +0.05 | 0.14 | 0.83 (0.63–1.16) | 0.75 (0.52–1.09) | 754 (490–942) | 5 |
+
+Findings:
+
+- **Close to unbiased** (median RE within ±0.1 by the fourth assessment, median |RE| ≤ 0.17): Deepwater flathead, Pink ling and Silver warehou. Pink ling's large positive error in the single run (§3) was one realisation; over 20 simulations it is unbiased.
+- **Persistently pessimistic:** Morwong (−0.60), School whiting (−0.4), Blue grenadier (−0.1 to −0.3) and Tiger flathead, which is strongly negative at the first assessment (−0.70) and improves to −0.20 as data accumulate. Under the placeholder HCR, this gives zero catches for Morwong in every simulation and in 18 % of Tiger flathead's projection years.
+- **Optimistic:** Bight redfish (+0.36 to +0.43; `kage` 8, the oldest entry age) and, mildly, Mirror dory (+0.12 to +0.19).
+- **Optimiser:** 24 "max gradient > 0.01" messages over 720 fits (3 %), concentrated in Tiger flathead (7), Silver warehou (5), Pink ling (4) and School whiting (4).
+- **Caveats:**
+  - 20 simulations give a rough picture of bias, not precise quantiles.
+  - The EM and OM quantities differ (fished-group biomass against SSB; §4.4 and `docs/delaydiff_em.md` remaining work 2), so part of each "bias" may be definitional, especially for stocks where selectivity and maturity differ.
+  - The priors are generic (§2).
 
 ## 6. Reproducing
 
