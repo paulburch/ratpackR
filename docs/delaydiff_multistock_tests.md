@@ -155,7 +155,7 @@ How the columns are defined:
   - Tier_DD: fished-group biomass relative to year 1 against OM SSB relative to the first model year (as in §7).
 - **Mean catch** is the median over simulations of the mean annual catch in the 10 projection years.
 - **OM end depletion** is OM SSB/SSB0 (`Total_Depletion`) in the last projection year. It is the same measure for both methods, so it shows the outcome under each.
-- The HCRs differ: Tier_1a uses the SESSF Tier 1 rule in the EM files (target 0.48, limit 0.20); Tier_DD uses the placeholder rule (`Dlim` 0.2, `Dtarg` 0.48, `Htarg` 0.1). So the catch and outcome columns compare EM + HCR combinations, not the EMs alone.
+- The HCRs differ: Tier_1a uses the SESSF Tier 1 rule in the EM files (`#Tier_1:` F_48 target and B_48 target, inflection 0.35, F = 0 at 0.20, buffer 1.0); Tier_DD uses the placeholder rule (`Dlim` 0.2, `Dtarg` 0.48, `Htarg` 0.1). So the catch and outcome columns compare EM + HCR combinations, not the EMs alone.
 
 | Stock | Method | Median RE A1 | Median RE A4 | Median \|RE\| | Mean catch (t) | OM end depletion | P(end < 0.2) |
 |---|---|---|---|---|---|---|---|
