@@ -104,7 +104,8 @@ Notes:
 ## 5. Suggested next steps
 
 1. (Done) Fix §4.1 in `Run_DelayDiff`; exclude Orange roughy east (§4.2).
-2. (Done for Tier_DD, §7) Run 20 simulations per stock. Comparison with Tier_1a on the same OMs: running. Tier_4a: not yet.
+2. (Done, §7 and §8) Run 20 simulations per stock, and compare with Tier_1a on the same OMs. Tier_4a: not yet.
+5. Look at the Tier_1a EM set-up for Blue grenadier and Silver warehou (§8: unbounded SS scale), and at Tiger flathead's EM growth ages (§8).
 3. Check the sensitivity to `Entry`, `kage` and the choice of CPUE and length fleets for the biased stocks (Bight redfish, Pink ling, Tiger flathead).
 4. Rename the `Inputs CSIROM/*.Sav` files (§4.3).
 
@@ -139,6 +140,59 @@ Findings:
   - 20 simulations give a rough picture of bias, not precise quantiles.
   - The EM and OM quantities differ (fished-group biomass against SSB; §4.4 and `docs/delaydiff_em.md` remaining work 2), so part of each "bias" may be definitional, especially for stocks where selectivity and maturity differ.
   - The priors are generic (§2).
+
+## 8. Tier_DD against Tier_1a, 20 simulations (5 Nov 2026)
+
+Tier_1a (Stock Synthesis, `CodeBase/ss3_linux`) was run on the same OMs, seeds and settings: 20 simulations, 10 projection years, an assessment every 3 years. The inputs were copies of `Inputs DD/` with only `Ass_Basic:Type` switched to `Tier_1a` (in `Temp/InputsT1a20/`; results in `Results/<Stock>.DDT1a20/`). Both methods use the same historical OM realisation in each simulation (e.g. the Silver warehou OM SSB in 2025 is identical in the two runs). From the first TAC onward the trajectories differ, because each method sets its own TACs.
+
+- Tier_1a: 8 of 9 stocks completed 20 simulations, in 8–152 minutes per stock (4 in parallel); Tiger flathead failed (see below).
+- Files: [`results/tier_dd_vs_tier1a_20sims.csv`](results/tier_dd_vs_tier1a_20sims.csv) (comparison), [`results/tier1a_20sims_by_sim.csv`](results/tier1a_20sims_by_sim.csv) and [`results/tier1a_20sims_summary.csv`](results/tier1a_20sims_summary.csv).
+
+How the columns are defined:
+
+- **RE** is each method's error against the OM quantity it estimates:
+  - Tier_1a: SS depletion SSB/SSB0 against OM `Total_Depletion`;
+  - Tier_DD: fished-group biomass relative to year 1 against OM SSB relative to the first model year (as in §7).
+- **Mean catch** is the median over simulations of the mean annual catch in the 10 projection years.
+- **OM end depletion** is OM SSB/SSB0 (`Total_Depletion`) in the last projection year. It is the same measure for both methods, so it shows the outcome under each.
+- The HCRs differ: Tier_1a uses the SESSF Tier 1 rule in the EM files (target 0.48, limit 0.20); Tier_DD uses the placeholder rule (`Dlim` 0.2, `Dtarg` 0.48, `Htarg` 0.1). So the catch and outcome columns compare EM + HCR combinations, not the EMs alone.
+
+| Stock | Method | Median RE A1 | Median RE A4 | Median \|RE\| | Mean catch (t) | OM end depletion | P(end < 0.2) |
+|---|---|---|---|---|---|---|---|
+| Morwong | Tier_1a | +0.15 | +0.03 | 0.13 | 183 (126–222) | 0.34 (0.24–0.49) | 0.05 |
+| | Tier_DD | −0.60 | −0.60 | 0.64 | 0 | 0.52 (0.36–0.66) | 0.00 |
+| Bight redfish | Tier_1a | +0.07 | −0.03 | 0.13 | 607 (512–738) | 0.54 (0.42–0.70) | 0.00 |
+| | Tier_DD | +0.36 | +0.43 | 0.48 | 1186 (950–1379) | 0.28 (0.22–0.62) | 0.05 |
+| Blue grenadier | Tier_1a | +2.36 | n/a (stock collapsed) | — | 10760 (9942–11437) | 0.00 (0.00–0.00) | 1.00 |
+| | Tier_DD | −0.13 | −0.28 | 0.28 | 1899 (1636–2469) | 0.78 (0.56–0.92) | 0.00 |
+| Deepwater flathead | Tier_1a | +0.15 | +0.01 | 0.20 | 1030 (827–1215) | 0.44 (0.29–0.59) | 0.05 |
+| | Tier_DD | −0.28 | +0.01 | 0.17 | 315 (252–471) | 0.65 (0.48–0.83) | 0.00 |
+| Mirror dory | Tier_1a | +0.03 | +0.29 | 0.25 | 1820 (1259–2237) | 0.32 (0.14–0.42) | 0.20 |
+| | Tier_DD | +0.12 | +0.19 | 0.15 | 264 (211–355) | 0.81 (0.58–1.06) | 0.00 |
+| Pink ling | Tier_1a | +0.24 | +0.31 | 0.30 | 668 (632–724) | 0.42 (0.35–0.48) | 0.00 |
+| | Tier_DD | −0.01 | −0.03 | 0.16 | 220 (67–383) | 0.63 (0.54–0.76) | 0.00 |
+| School whiting | Tier_1a | +0.14 | −0.09 | 0.25 | 2656 (1922–2999) | 0.53 (0.32–0.97) | 0.10 |
+| | Tier_DD | −0.47 | −0.37 | 0.43 | 399 (295–666) | 0.92 (0.70–1.39) | 0.00 |
+| Silver warehou | Tier_1a | +0.53 | −0.03 (after collapse) | 0.96 | 2738 (2058–3346) | 0.02 (0.01–0.07) | 0.95 |
+| | Tier_DD | −0.09 | +0.05 | 0.14 | 754 (490–942) | 0.80 (0.53–1.21) | 0.00 |
+| Tiger flathead | Tier_1a | failed (EM input; see below) | | | | | |
+| | Tier_DD | −0.70 | −0.20 | 0.51 | 479 (316–612) | 0.74 (0.53–1.12) | 0.00 |
+
+Findings:
+
+- **Where Tier_1a works** (Morwong, Bight redfish, Deepwater flathead, School whiting), it estimates depletion more accurately than Tier_DD: median |RE| 0.13–0.25 against 0.17–0.64. It also takes 2–5 times more catch.
+  - Tier_DD's pessimism leaves these stocks well above target at the end (0.52–0.92 against 0.34–0.54 under Tier_1a).
+  - Its optimism for Bight redfish lowers the stock to 0.28 (5 % of simulations below 0.2).
+- **Deepwater flathead and Pink ling:** Tier_DD is as accurate as Tier_1a or better (median |RE| 0.17 against 0.20, and 0.16 against 0.30). Pink ling's Tier_1a is biased high (+0.24 to +0.31).
+- **Mirror dory:** both methods are biased high. Tier_1a's larger catches give P(end < 0.2) = 0.20.
+- **Blue grenadier and Silver warehou: Tier_1a fails as an EM in this set-up.**
+  - The SS fit at the first assessment has an unbounded scale. In simulation 1, SS SSB in the first model year was 4.9e8 t for Blue grenadier (OM 3.6e4 t), and 3.35e5 t for Silver warehou (OM 2.3e4 t; SS depletion 0.88 against OM 0.56 in 2025).
+  - The first RBC was about 58,600 t for Blue grenadier and about 22,000 t for Silver warehou, against recent catches of about 12,600 t and 150–400 t.
+  - The OM stock collapsed in every Blue grenadier simulation and in 95 % of the Silver warehou simulations.
+  - This needs checking against the EM files (`Inputs CSIRO/Blue.grenadier.EM`, `Inputs Buffer/Silver.warehou.EM`: priors and bounds on R0, `SS_est_opt EstOnly` from the original par file, index set-up) before Tier_1a is used as the benchmark for these two stocks. Tier_DD is stable for both.
+- **Tiger flathead Tier_1a fails before the first assessment.** SS stops with "Fatal Error! AFIX2 (Age post-settlement for L2, aka Amax) must be <= nages, entered value = 36". The EM data file has 20 ages (`#_Nages`), but the growth set-up (`#Growth:min/max age 3 36` in `Inputs CSIROM/Tiger.flathead.OM`, carried into the EM control file) puts L2 at age 36. This is an input inconsistency; both bundled SS executables come from the 3.30.24 era, so it should fail on Windows too. Tier_DD uses the OM growth directly and is not affected.
+- **Run time:** Tier_1a took 8–152 minutes per stock (Blue grenadier slowest), against 6–20 minutes for Tier_DD.
+- **Code note:** `R Inserts/Assessment.R` calls `file.remove("ss3par.par", showWarnings = F)` (and the same for `ss3.b01`). `file.remove()` has no `showWarnings` argument, so `FALSE` is taken as a second file name, which gives a warning at every SS run. Harmless, but noisy.
 
 ## 6. Reproducing
 
