@@ -1,0 +1,290 @@
+---
+title: "Running ratpackR in the cloud with Claude Code: Linux port, bug review and fix testing"
+subtitle: "Project summary for Geoff Tuck"
+author: "Paul Burch (CSIRO), with Claude Code"
+date: "November 2026"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    self_contained: true
+---
+
+```{css, echo = FALSE}
+body { font-size: 125%; line-height: 1.5; }
+table { font-size: 95%; }
+code, pre { font-size: 90%; }
+blockquote { font-size: 100%; border-left: 4px solid #8aa; padding-left: 1em; color: #333; }
+```
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Purpose and scope
+
+This document explains how ratpackR was run in a Claude Code cloud session and reviewed for
+bugs: what was asked at each step, how Claude Code responded, and how the bug review and the
+fix testing were carried out.
+
+ratpackR is André Punt's R management strategy evaluation (MSE) framework ("NewRat"),
+applied to SESSF stocks. Each simulated year, an operating model (OM) projects one or more
+stocks; an estimation model (EM), usually Stock Synthesis (SS), is fitted; and a harvest
+control rule sets RBCs and TACs.
+
+I forked the code to a personal public repository, `paulburch/ratpackR`. The project had two
+aims:
+
+1. **run ratpackR on Linux** in a cloud session (it had only ever been run on Windows);
+2. **review the code for correctness bugs**, then test whether fixing each bug on its own
+   breaks other parts of the code.
+
+The whole project ran in one Claude Code cloud session, an isolated Linux container
+(Ubuntu 24.04, 4 cores). I gave the instructions; Claude Code did the work and pushed the
+results to GitHub. **Nothing was pushed to André's repository** (`puntae/ratpackR`), and
+André's model code was changed only on separate branches, with each change kept minimal.
+
+## Where the results are
+
+| Branch | Contents |
+|---|---|
+| `linux-portability` | Linux set-up (`setup_linux.sh`, `docs/cloud_setup.md`), portable paths, the platform-dependent SS call, and a smoke-test script. Pull request #1 into the fork's `main`. |
+| `bug-review` | the above plus `docs/bug_review.md` (the bug review) and `docs/bug_checks.R` (reproducible checks) |
+| `bugfix-experiments` | the above plus one commit per tested fix, the running log `docs/bugfix/bugfix_log.md`, the rebuilt parallel driver, and a regression test suite (`tests/run_all.sh`) |
+
+# The initial request
+
+My initial prompt set out the background and the task. Its main points were:
+
+> ratpackR is André Punt's R MSE framework for SESSF fish stocks. Paul Burch (CSIRO) forked
+> it to `paulburch/ratpackR` (public, personal GitHub account) … Paul works on Windows; the
+> code has never been run on Linux. Goals: make it runnable in the cloud, then do a bug review
+> that Paul will go through afterwards. The fork is public, so nothing confidential or
+> AFMA-sourced goes in. Keep changes to André's files minimal so upstream merges stay clean.
+>
+> **Part 1: get it running on Linux.** Install R, a C++ toolchain for `Rcpp::sourceCpp`, and
+> `r4ss`, `RTMB`, `Rcpp`, `RcppArmadillo` as a repeatable `setup_linux.sh`, documented in
+> `docs/cloud_setup.md`. Make the hard-coded `setwd("C:/Research/NewRat/...")` paths portable
+> (for example `Sys.getenv("RATPACK_ROOT", unset = getwd())`) and fix case-sensitivity
+> mismatches. Make the Stock Synthesis call platform-dependent so that Linux uses
+> `CodeBase/ss3_linux`, and report its version. Smoke-test Silver.warehou with the fewest
+> simulations and projection years, first without estimation (`Estimation.test <- 1`), then
+> with estimation. Keep `Results/` and `Temp/` out of git.
+>
+> **Part 2: bug review.** Review `RatpackR.R` and `R Inserts/` for wrong indexing, off-by-one
+> errors, misuse of `<<-`, divide-by-zero or NaN, overwritten results (for example `Buffer` in
+> `SetBuffer`), and drift in `R Inserts/Parallel/`. Where possible confirm each suspected bug
+> with a small reproducible R check. Write `docs/bug_review.md` ranked by severity, with
+> `file:line`, trigger, effect, suggested fix, and confirmed or suspected. **Don't change
+> André's code to fix the bugs; only report them.**
+>
+> Done means: the branch is pushed, and the final message lists what ran, what failed (with
+> errors), run times and every change made to the original files.
+
+The repository's `CLAUDE.md` file, which Claude Code reads automatically, added standing
+rules: commit under my personal GitHub identity, never push to upstream, keep the diffs
+against André's files small, and keep confidential data out of the public fork.
+
+# How the work progressed: prompts and responses
+
+## Part 1: getting ratpackR running on Linux
+
+**What Claude Code did.**
+
+- **Software installation.** The cloud network policy blocked CRAN and r-universe. Claude
+  Code installed R 4.5.3, the compilers and the binary packages from conda-forge (via
+  micromamba), and built RTMB 2.0 and r4ss 1.56.0 from GitHub. The CRAN `r4ss` is now only a
+  stub that points to GitHub. All of this is scripted in `setup_linux.sh` and takes about
+  3.5 minutes.
+- **Portability changes**, all small, with Windows behaviour unchanged:
+  - run streams take their root from `RATPACK_ROOT` instead of the hard-coded
+    `C:/Research/...` path;
+  - file-name case mismatches were fixed (`RatPackR.r`, `R inserts/Readin.R` and others);
+  - on Linux the SS executable is copied into each EM folder as `ss3`, so SS writes the
+    `ss3.par` file the code expects.
+- **Stock Synthesis version.** `ss3_linux` reports **SS V3.30.26.00, safe build, ADMB 13.2**.
+- **Missing inputs.** The Silver.warehou OM and EM files are missing from `Inputs CSIRO/`, in
+  the fork and upstream alike. The complete set in `Inputs Buffer/` was used instead.
+- **Smoke tests** (1 simulation, 1 projection year), all completed:
+
+| `Estimation.test` | Time | Result |
+|---|---|---|
+| 1 (no estimation) | 78 s | SS read back all 147 `.par` values exactly |
+| 2 (deterministic data, SS estimation) | 88 s | 42 parameters estimated, maximum gradient 1.8e-5 |
+| 99 (real, stochastic data) | 95 s | 42 parameters estimated, maximum gradient 2.9e-5 |
+
+**Response to me.** Claude Code reported the above, flagged the missing input files, and
+noted that the first push had failed: the Claude GitHub app had no write access to the
+repository. It supplied the work as a git patch in the meantime.
+
+## Getting the work onto GitHub
+
+| My prompt (paraphrased) | Response |
+|---|---|
+| "Suggest further actions for this cloud session." | A prioritised list: fix GitHub access and push; obtain the missing CSIRO inputs; test the most important bugs; run all stocks; draft a note to André. |
+| "I think I have done #1, could you please check." | Push still refused, so Claude Code diagnosed it: reads worked but writes returned "Resource not accessible by integration", meaning the app was not installed on the repository. It gave the GitHub settings steps. |
+| "I installed Claude on my GitHub, could you check again." | Push succeeded. |
+| (a stop hook repeatedly asked for the commits to be re-authored under Claude's identity) | Declined, because `CLAUDE.md` requires my identity. Confirmed later: commits stay under my GitHub noreply address, not my personal email, to keep it out of a public repository. |
+
+## Decisions on the next phase
+
+I asked for the list of items needing my attention, and then decided:
+
+> #1 commit as paulburch … #2 do I need a branch for Linux? If I do, make this and do the pull
+> request. #3 For bugs I want to explore whether fixing any of them individually causes other
+> parts of the code to break; can you do it sequentially with tests. Before you start this,
+> please write a file to the git repo that describes all of the bugs you found. #4 [the
+> `FixedCosts` bug] is likely a placeholder for a feature in development; add this
+> qualification to the bug report.
+
+**Response:**
+
+- the work was split into the `linux-portability` and `bug-review` branches, with pull
+  request #1;
+- the `FixedCosts` qualification was added to the bug report;
+- fixes were applied one at a time on `bugfix-experiments` (method in Section 4.3).
+
+I then asked whether Claude Code could continue while my machine was closed. It can: the
+session runs in the cloud, and work continues while a request is being processed. I asked it
+to *"continue with the low severity items then the suspected items"*. Later, from its list of
+suggestions, I asked it to do *"4 and 5"*: finish the open items (the parallel version,
+`CatchType` 3 and the Tier 4a P.cod result), and add a regression test script.
+
+# How the bug check was done
+
+## Step 1: reading the code
+
+Claude Code read the whole engine and its modules, about 10 000 lines:
+
+- `RatpackR.R` (projection, harvest control rules, TAC adjustment, multispecies F solver,
+  reference points);
+- `R Inserts/ReadIn.R`, `Assessment.R` (SS input writing, Tiers 1a, 4a, 4b and 5), `DataGen.R`,
+  `WriteOut.R` and `SaveFiles.R`;
+- `Model.cpp` and `Utils.cpp`;
+- the `R Inserts/Parallel/` copies, compared line by line with the main versions.
+
+For each function it looked for the classes of error in the brief. It also compared related
+routines with each other: the equilibrium age structure against the projection's movement
+convention, and what the input writers produce against what the readers expect.
+
+## Step 2: confirming suspected bugs with reproducible checks
+
+Claude Code wrote `docs/bug_checks.R`, which loads the real functions and a copy of the
+Silver.warehou inputs and runs 20 checks in about 30 seconds. Each prints CONFIRMED or NOT
+REPRODUCED. The checks used three kinds of evidence:
+
+- **calling the real functions** with controlled inputs. For example, `SetBuffer` with a
+  default buffer of 0.8 returned an unchanged TAC, and `SPR_ref` with one-way movement put no
+  fish in the receiving area;
+- **edited input copies.** For example, a different catch-bias row for fleet 2 was ignored,
+  and a positive steepness bias didn't reach the SS control file;
+- **evidence from the smoke runs.** For example, the per-area discard output was 0 while
+  total discards were 6 792 t, and Cost and Profit were NA in every output file.
+
+In addition, the SS `.par` file round-trip and the age-error matrix orientation were
+checked; both are correct.
+
+## Step 3: the bug report
+
+The findings are in `docs/bug_review.md`: **24 bugs ranked High, Medium or Low, plus 21
+suspected issues**. Each has its location (`file:line`), what triggers it, what goes wrong,
+a suggested fix, and its status (confirmed by test, confirmed by inspection, or suspected).
+The most important were:
+
+- **`SetBuffer` never applied the default buffer.** The buffer-study input
+  (`Inputs Buffer/Silver.warehou.EM`, default 0.9) was affected.
+- **`FixedCosts` was read from a non-existent column**, so Cost and Profit were NA. This is
+  probably a feature still in development.
+- **The SS folder clean-up could never run**, leaving about 11 MB per assessment.
+- **Multi-stock errors:** the TAC reallocation loop used the wrong variable (`Istocks`), and
+  PGMSY divided by zero.
+- **Multi-area errors** in the reference-point and initial-equilibrium routines.
+- **Several crash paths:** discard-age data, Tier 5 runs, one Tier 4a option and closed areas.
+- **Drift:** the `Parallel/` code was an outdated copy of the engine.
+
+## Step 4: testing fixes one at a time
+
+To answer my question, *does fixing a bug on its own break anything else?*, each fix was
+handled the same way:
+
+1. **One commit per fix** on `bugfix-experiments`, applied cumulatively in severity order,
+   changing only the lines needed. André's original code remains untouched on the other
+   branches.
+2. **The same tests after every fix:**
+   - all 20 checks, where only the fixed bug's check should change;
+   - the smoke runs at `Estimation.test` 1 and 2 (and 99 where relevant);
+   - a comparison of every output file with the previous step, value by value, at a
+     relative tolerance of 1e-8.
+
+   A repeat run of the unfixed code gave identical output, so any difference could be
+   attributed to the fix.
+3. **Edited input copies for code the standard runs never reach.** These included discard
+   ages, conditional age-at-length, Tier 5, Tier 4a with other settings, equilibrium catch,
+   closed areas, implementation error and invalid settings. Each was run on the old and the
+   new code.
+4. **A log entry for every step** in `docs/bugfix/bugfix_log.md`, pushed after each fix, so
+   the work could continue after an interruption.
+
+## Results
+
+| Group | Outcome | Broke anything else? |
+|---|---|---|
+| High and Medium bugs (#1–#18) | 17 fixed and tested; parallel drift (#17) rebuilt later | No |
+| Low bugs (#19–#24) | all 6 fixed and tested | No |
+| Suspected items (#25–#45) | 14 fixed and tested; 6 left unchanged by decision (harmless, intended, or need André); Tier 4a P.cod investigated | No |
+| Open items (#15, #17, #45) | `CatchType` 3 input F restored; parallel driver rebuilt; Tier 4a P.cod explained | No |
+
+- **No fix broke another part of the code.** Every run completed, and outputs changed only
+  where a fix was meant to act. With all fixes applied together, the deterministic RBCs were
+  unchanged.
+- **The 2026 TAC fell by exactly the 0.9 buffer** that is now applied (6 727 → 6 054 t in
+  the no-estimation run).
+- **Stochastic runs draw different random numbers** after the random-seed fix, so they can't
+  be compared draw-for-draw with older runs.
+- **One suspected item was a real crash:** closing an area stopped the run.
+- **The Tier 4a RBC of 0 for P.cod comes from the input settings, not the code.** The model
+  assumes biomass in 1985–1995 averaged BMSY (40% of unfished), whereas in the OM the stock
+  was at 85–132% of unfished in those years. Its non-convergence in early tests was caused by
+  noise-free test data.
+- **The rebuilt parallel driver** reproduces the serial run exactly (2 simulations, all
+  output files identical).
+
+## Step 5: a regression test suite
+
+`tests/run_all.sh` runs the checks, the Silver.warehou runs with and without estimation, and
+a P.cod Tier 4a run, and compares them with stored reference outputs. The standard set takes
+about 4 minutes; `--full` adds the stochastic and parallel runs (about 9 minutes). It passes
+on the current code and detects a change of 4 × 10⁻⁵ in a single value. It is meant to be
+run after each merge of André's updates.
+
+# Decisions for André
+
+- whether the default and time buffers combine multiplicatively (#2);
+- the PGMSY rule for a linked fleet with no recent catch (#5);
+- the movement age convention (#8);
+- a TAC of 0 when there is no TAC management (Tier 5, #14);
+- whether reference points should use current-year M (#31);
+- the environmental-index condition (#38), insurance and predator modules (#41, #42);
+- multi-area mapping of F and initial values;
+- the `CatchType` 3 restriction (no depletion tuning) and the zero F in the last two years
+  of the `.SAV` file;
+- P.cod Tier 4a anchor years;
+- whether `R Inserts/Parallel/Assessment.R`, now unused, can be deleted.
+
+# Lessons for using Claude Code on similar projects
+
+- **State constraints explicitly.** For example: a public fork, so no confidential data;
+  minimal diffs against upstream; and how to treat the original author's code. A
+  `CLAUDE.md` file in the repository keeps such rules in force across sessions.
+- **Ask for evidence, not opinions.** Requiring a reproducible check for each suspected bug
+  separated real bugs from false alarms, and turned up one crash that inspection alone had
+  rated as suspected.
+- **Change one thing at a time and compare outputs.** Cumulative single fixes, each
+  regression-tested against the previous step, show exactly what each change does.
+- **Keep a running log in the repository.** Cloud sessions are temporary; a log pushed after
+  each step makes the work resumable and reviewable.
+- **Check access early.** GitHub write access for the Claude app, and network access for
+  package repositories, were the main practical obstacles. Both were solved by settings
+  changes, not code.
