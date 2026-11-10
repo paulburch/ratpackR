@@ -180,10 +180,10 @@ How the columns are defined:
 
 Findings:
 
-- **Where Tier_1a works** (Morwong, Bight redfish, Deepwater flathead, School whiting), it estimates depletion more accurately than Tier_DD: median |RE| 0.13–0.25 against 0.17–0.64. It also takes 2–5 times more catch.
-  - Tier_DD's pessimism leaves these stocks well above target at the end (0.52–0.92 against 0.34–0.54 under Tier_1a).
-  - Its optimism for Bight redfish lowers the stock to 0.28 (5 % of simulations below 0.2).
-- **Deepwater flathead and Pink ling:** Tier_DD is as accurate as Tier_1a or better (median |RE| 0.17 against 0.20, and 0.16 against 0.30). Pink ling's Tier_1a is biased high (+0.24 to +0.31).
+- **Tier_1a is more accurate** for Morwong, Bight redfish and School whiting (median |RE| 0.13–0.25 against 0.43–0.64).
+  - For Morwong and School whiting, Tier_DD's pessimism gives much lower catches (0 and 399 t against 183 and 2656 t) and stocks well above target (0.52 and 0.92 against 0.34 and 0.53).
+  - For Bight redfish, Tier_DD's optimism gives about twice the catch (1186 t against 607 t) and lowers the stock to 0.28 (5 % of simulations below 0.2).
+- **Deepwater flathead and Pink ling:** Tier_DD is as accurate as Tier_1a or better (median |RE| 0.17 against 0.20, and 0.16 against 0.30), with lower catches and higher end depletion. Pink ling's Tier_1a is biased high (+0.24 to +0.31).
 - **Mirror dory:** both methods are biased high. Tier_1a's larger catches give P(end < 0.2) = 0.20.
 - **Blue grenadier and Silver warehou: Tier_1a fails as an EM in this set-up.**
   - The SS fit at the first assessment has an unbounded scale. In simulation 1, SS SSB in the first model year was 4.9e8 t for Blue grenadier (OM 3.6e4 t), and 3.35e5 t for Silver warehou (OM 2.3e4 t; SS depletion 0.88 against OM 0.56 in 2025).
